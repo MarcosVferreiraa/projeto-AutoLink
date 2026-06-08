@@ -1,0 +1,17 @@
+import React from 'react';
+import { Search, SlidersHorizontal } from 'lucide-react';
+export function FilterSidebar({
+  onFilterChange
+}) {
+  const handleChange = e => {
+    const {
+      name,
+      value
+    } = e.target;
+    onFilterChange(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  return <div className="bg-card border border-border rounded-lg p-6"><div className="flex items-center gap-2 mb-6"><SlidersHorizontal className="w-5 h-5" /><h2>Filtros</h2></div><div className="space-y-4"><div><label className="block mb-2 text-sm">Buscar</label><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><input type="text" name="search" placeholder="Marca ou modelo..." onChange={handleChange} className="w-full pl-10 pr-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring" /></div></div>{/* Brand */}<div><label className="block mb-2 text-sm">Marca</label><select name="brand" onChange={handleChange} className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"><option value="">Todas</option><option value="BMW">BMW</option><option value="Mercedes-Benz">Mercedes-Benz</option><option value="Audi">Audi</option><option value="Toyota">Toyota</option><option value="Honda">Honda</option><option value="Volkswagen">Volkswagen</option><option value="Chevrolet">Chevrolet</option><option value="Ford">Ford</option></select></div>{/* Price Range */}<div><label className="block mb-2 text-sm">Faixa de Preço</label><div className="grid grid-cols-2 gap-2"><input type="number" name="minPrice" placeholder="Mín" onChange={handleChange} className="px-3 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring" /><input type="number" name="maxPrice" placeholder="Máx" onChange={handleChange} className="px-3 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring" /></div></div>{/* Year Range */}<div><label className="block mb-2 text-sm">Ano</label><div className="grid grid-cols-2 gap-2"><input type="number" name="minYear" placeholder="De" onChange={handleChange} className="px-3 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring" /><input type="number" name="maxYear" placeholder="Até" onChange={handleChange} className="px-3 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring" /></div></div>{/* Fuel Type */}<div><label className="block mb-2 text-sm">Combustível</label><select name="fuel" onChange={handleChange} className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"><option value="">Todos</option><option value="Gasolina">Gasolina</option><option value="Flex">Flex</option><option value="Diesel">Diesel</option><option value="Elétrico">Elétrico</option><option value="Híbrido">Híbrido</option></select></div>{/* Transmission */}<div><label className="block mb-2 text-sm">Câmbio</label><select name="transmission" onChange={handleChange} className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"><option value="">Todos</option><option value="Automático">Automático</option><option value="Manual">Manual</option></select></div></div></div>;
+}
