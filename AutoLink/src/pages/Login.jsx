@@ -1,10 +1,9 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
-import { auth } from "../firebase/firebase";
 import Alert from "@mui/material/Alert";
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
 
@@ -12,32 +11,50 @@ export default function Login() {
         email: '',
         password: ''
     });
-    const [error, setError] = useState('');
 
-    const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+    const [error, setError] = useState("");
+
+    const { login } = useAuth();
+
+    const handleChange = (e) =>
+        setForm(f => ({
+            ...f,
+            [e.target.name]: e.target.value
+        }));
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setError("");
+
         try {
             await login(form.email, form.password);
         } catch (err) {
             setError(err.code);
         }
-    }
-    async function login(email, password) {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        return cred;
-
-    }
+    };
 
     return (
         <Box component="form" onSubmit={onSubmit}>
             {error && <Alert severity="error">{error}</Alert>}
-            <TextField label="Email" name="email" value={form.email} onChange={handleChange} required />
-            <TextField label="Password" type="password" name="password" value={form.password} onChange={handleChange} required />
-            <Button type="submit">Login</Button>
 
+            <TextField
+                label="Email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+            />
+
+            <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                required
+            />
+
+            <Button type="submit">Login</Button>
         </Box>
-    )
+    );
 }
