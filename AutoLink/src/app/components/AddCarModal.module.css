@@ -1,0 +1,159 @@
+/* AddCarModal.module.css */
+
+.addCarModalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.addCarModalPanel {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 780px;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 
+              0 8px 10px -6px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+}
+
+.addCarModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+.addCarModalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.addCarModalClose {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+}
+
+.addCarModalClose:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.addCarModalForm {
+  padding: 2rem;
+}
+
+.addCarModalGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .addCarModalGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.colSpan2 {
+  grid-column: span 2;
+}
+
+.addCarModalLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.addCarModalGroup {
+  position: relative;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  z-index: 10;
+}
+
+.addCarModalInput,
+.addCarModalSelect,
+.addCarModalTextarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background-color: #f9fafb;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.addCarModalInput:focus,
+.addCarModalSelect:focus,
+.addCarModalTextarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.addCarModalTextarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.addCarModalButtonRow {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.addCarModalSubmit {
+  flex: 1;
+  padding: 14px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addCarModalSubmit:hover {
+  background-color: #1d4ed8;
+}
+
+.addCarModalCancel {
+  padding: 14px 28px;
+  background-color: transparent;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addCarModalCancel:hover {
+  background-color: #f3f4f6;
+}

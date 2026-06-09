@@ -1,10 +1,74 @@
-import React from 'react';
 import { Link } from 'react-router';
-import { Car, Phone, Mail, User, LogIn } from 'lucide-react';
-export function Header({
-  user,
-  onLoginClick,
-  onProfileClick
-}) {
-  return <header className="bg-card border-b border-border"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"><div className="flex items-center justify-between h-16"><Link to="/" className="flex items-center gap-2"><div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center"><Car className="w-6 h-6 text-primary-foreground" /></div><div><h1 className="text-xl">AutoLink</h1><p className="text-xs text-muted-foreground">Carros Seminovos</p></div></Link><nav className="hidden md:flex items-center gap-6"><Link to="/" className="text-foreground hover:text-primary transition-colors">Início</Link><Link to="/favoritos" className="text-foreground hover:text-primary transition-colors">Favoritos</Link><Link to="/financiamento" className="text-foreground hover:text-primary transition-colors">Financiamento</Link><Link to="/sobre" className="text-foreground hover:text-primary transition-colors">Sobre</Link><Link to="/contato" className="text-foreground hover:text-primary transition-colors">Contato</Link></nav><div className="flex items-center gap-4"><div className="hidden lg:flex items-center gap-4 text-sm"><div className="flex items-center gap-2"><Phone className="w-4 h-4 text-muted-foreground" /><span>(11) 98765-4321</span></div><div className="flex items-center gap-2"><Mail className="w-4 h-4 text-muted-foreground" /><span>contato@autolink.com.br</span></div></div>{user ? <button onClick={onProfileClick} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"><User className="w-4 h-4" /><span className="hidden sm:inline">{user.name.split(' ')[0]}</span></button> : <button onClick={onLoginClick} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"><LogIn className="w-4 h-4" /><span className="hidden sm:inline">Entrar</span></button>}</div></div></div></header>;
+import { Car, Phone, Mail, User, LogIn, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import './Header.css';
+
+export function Header({ onLoginClick, onProfileClick }) {
+  const { user, isAdmin } = useAuth();
+
+  return (
+    <header className="header">
+      <div className="header-inner">
+        <div className="header-row">
+          <Link to="/" className="header-brand">
+            <div className="header-logo">
+              <Car className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <div className="header-title">
+              <h1>autoLink</h1>
+              <p>Carros Seminovos</p>
+            </div>
+          </Link>
+
+          <nav className="header-nav">
+            <Link to="/" className="header-link">Início</Link>
+            <Link to="/favoritos" className="header-link">Favoritos</Link>
+            {user && !isAdmin && (
+              <Link to="/propostas" className="header-link">Minhas Propostas</Link>
+            )}
+            {isAdmin && (
+              <Link to="/admin/propostas" className="header-admin-link">
+                <Shield className="w-4 h-4" />
+                Painel Admin
+              </Link>
+            )}
+            <Link to="/financiamento" className="header-link">Financiamento</Link>
+            <Link to="/sobre" className="header-link">Sobre</Link>
+            <Link to="/contato" className="header-link">Contato</Link>
+          </nav>
+
+          <div className="header-contact">
+            <div className="header-contact-group">
+              <div className="header-contact-item">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                <span>(11) 98765-4321</span>
+              </div>
+              <div className="header-contact-item">
+                <Mail className="w-4 h-4 text-muted-foreground" />
+                <span>contato@autolink.com.br</span>
+              </div>
+            </div>
+
+            {user ? (
+              <button
+                onClick={onProfileClick}
+                className="header-button"
+              >
+                {isAdmin ? <Shield className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                <span>{user.name.split(' ')[0]}</span>
+              </button>
+            ) : (
+              <button
+                onClick={onLoginClick}
+                className="header-button"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Entrar</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
 }

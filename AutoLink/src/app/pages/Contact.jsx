@@ -1,5 +1,4 @@
-﻿import React from 'react';
-import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+﻿import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { useState } from 'react';
 
 export function Contact() {
@@ -11,173 +10,174 @@ export function Contact() {
     message: ''
   });
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
     alert('Mensagem enviada com sucesso! Entraremos em contato em breve.');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    });
+    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
   };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({
+  const handleChange = (e) => {
+    setFormData(prev => ({
       ...prev,
-      [name]: value
+      [e.target.name]: e.target.value
     }));
   };
 
   return (
-    <main className="contact-page">
-      <section className="contact-hero">
-        <h1>Entre em Contato</h1>
-        <p>Estamos aqui para ajudar você a encontrar o carro ideal.</p>
-      </section>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto text-center mb-12">
+        <h1 className="text-4xl mb-4">Entre em Contato</h1>
+        <p className="text-xl text-muted-foreground">
+          Estamos aqui para ajudar você a encontrar o carro ideal
+        </p>
+      </div>
 
-      <section className="contact-grid">
-        <div className="contact-info">
-          <article className="contact-card">
-            <div className="contact-card-content">
-              <div className="contact-card-icon">
-                <Phone />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Contact Info */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-card rounded-lg border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Phone className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="contact-card-title">Telefone</h3>
-                <p className="contact-card-text">(11) 98765-4321</p>
-                <p className="contact-card-text">(11) 3456-7890</p>
+                <h3 className="mb-2">Telefone</h3>
+                <p className="text-muted-foreground">(11) 98765-4321</p>
+                <p className="text-muted-foreground">(11) 3456-7890</p>
               </div>
             </div>
-          </article>
-
-          <article className="contact-card">
-            <div className="contact-card-content">
-              <div className="contact-card-icon">
-                <Mail />
-              </div>
-              <div>
-                <h3 className="contact-card-title">E-mail</h3>
-                <p className="contact-card-text">contato@autolink.com.br</p>
-                <p className="contact-card-text">vendas@autolink.com.br</p>
-              </div>
-            </div>
-          </article>
-
-          <article className="contact-card">
-            <div className="contact-card-content">
-              <div className="contact-card-icon">
-                <MapPin />
-              </div>
-              <div>
-                <h3 className="contact-card-title">Endereço</h3>
-                <p className="contact-card-text">Av. Paulista, 1000</p>
-                <p className="contact-card-text">Bela Vista, São Paulo - SP</p>
-                <p className="contact-card-text">CEP: 01310-100</p>
-              </div>
-            </div>
-          </article>
-
-          <article className="contact-card">
-            <div className="contact-card-content">
-              <div className="contact-card-icon">
-                <Clock />
-              </div>
-              <div>
-                <h3 className="contact-card-title">Horário de Atendimento</h3>
-                <p className="contact-card-text">Segunda a Sexta: 8h - 18h</p>
-                <p className="contact-card-text">Sábado: 9h - 14h</p>
-                <p className="contact-card-text">Domingo: Fechado</p>
-              </div>
-            </div>
-          </article>
-        </div>
-
-        <div className="contact-form-card">
-          <div className="contact-form-header">
-            <h2>Envie sua Mensagem</h2>
-            <p>Preencha o formulário abaixo e nossa equipe retornará em breve.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="contact-form">
-            <div className="form-row form-row-cols-2">
-              <label className="form-field-label">
-                Nome Completo
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="form-field"
-                />
-              </label>
-
-              <label className="form-field-label">
-                E-mail
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="form-field"
-                />
-              </label>
+          <div className="bg-card rounded-lg border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Mail className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="mb-2">E-mail</h3>
+                <p className="text-muted-foreground">contato@autolink.com.br</p>
+                <p className="text-muted-foreground">vendas@autolink.com.br</p>
+              </div>
             </div>
+          </div>
 
-            <div className="form-row form-row-cols-2">
-              <label className="form-field-label">
-                Telefone
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="form-field"
-                />
-              </label>
-
-              <label className="form-field-label">
-                Assunto
-                <select
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="form-field"
-                >
-                  <option value="">Selecione...</option>
-                  <option value="info">Informações sobre veículos</option>
-                  <option value="financing">Financiamento</option>
-                  <option value="proposal">Fazer uma proposta</option>
-                  <option value="other">Outros</option>
-                </select>
-              </label>
+          <div className="bg-card rounded-lg border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <MapPin className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="mb-2">Endereço</h3>
+                <p className="text-muted-foreground">
+                  Av. Paulista, 1000<br />
+                  Bela Vista<br />
+                  São Paulo - SP<br />
+                  CEP: 01310-100
+                </p>
+              </div>
             </div>
+          </div>
 
-            <label className="form-field-label">
-              Mensagem
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                required
-                rows={6}
-                className="form-field form-textarea"
-              />
-            </label>
-
-            <button type="submit" className="contact-button">
-              Enviar mensagem
-              <Send className="button-icon" />
-            </button>
-          </form>
+          <div className="bg-card rounded-lg border border-border p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Clock className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="mb-2">Horário de Atendimento</h3>
+                <p className="text-muted-foreground">
+                  Segunda a Sexta: 8h - 18h<br />
+                  Sábado: 9h - 14h<br />
+                  Domingo: Fechado
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-    </main>
+
+        {/* Contact Form */}
+        <div className="lg:col-span-2">
+          <div className="bg-card rounded-lg border border-border p-6">
+            <h2 className="mb-6">Envie sua Mensagem</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2">Nome Completo</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">E-mail</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2">Telefone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Assunto</label>
+                  <select
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="info">Informações sobre veículos</option>
+                    <option value="financing">Financiamento</option>
+                    <option value="proposal">Fazer uma proposta</option>
+                    <option value="other">Outros</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-2">Mensagem</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  rows={6}
+                  className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Enviar Mensagem
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

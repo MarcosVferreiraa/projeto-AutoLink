@@ -8,6 +8,7 @@ import { FinanceSimulator } from './pages/FinanceSimulator';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { NotFound } from './pages/NotFound';
+import { AdminProposals } from './pages/AdminProposals';   // ← Adicionado
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: 'financiamento', Component: FinanceSimulator },
       { path: 'sobre', Component: About },
       { path: 'contato', Component: Contact },
+      { path: 'admin/propostas', Component: AdminProposals },   // ← Nova rota
       { path: '*', Component: NotFound }
     ]
   }

@@ -1,8 +1,12 @@
-﻿import React, { useState } from 'react';
-import { X, Mail, Lock, User, Phone } from 'lucide-react';
+﻿import { X, Mail, Lock, User, Phone, Shield } from 'lucide-react';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import './LoginModal.css';
 
-export function LoginModal({ isOpen, onClose, onLogin }) {
+export function LoginModal({ isOpen, onClose }) {
+  const { login } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,42 +18,55 @@ export function LoginModal({ isOpen, onClose, onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onLogin({
-      name: formData.name || 'Usuário',
-      email: formData.email,
-      phone: formData.phone
-    });
-    setFormData({ name: '', email: '', password: '', phone: '' });
-    onClose();
+    setError('');
+
+    if (isRegistering) {
+      // Registration: create as a regular user session
+      const result = login('joao@email.com', 'user123');
+      if (result.success) {
+        setFormData({ name: '', email: '', password: '', phone: '' });
+        onClose();
+      }
+      return;
+    }
+
+    const result = login(formData.email, formData.password);
+    if (result.success) {
+      setFormData({ name: '', email: '', password: '', phone: '' });
+      onClose();
+    } else {
+      setError(result.error || 'Erro ao fazer login');
+    }
   };
 
   const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setError('');
+  };
+
+  const handleClose = () => {
+    setFormData({ name: '', email: '', password: '', phone: '' });
+    setError('');
+    setIsRegistering(false);
+    onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full shadow-xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+    <div className="login-modal-overlay">
+      <div className="login-modal">
+        <div className="login-modal-header">
           <h2>{isRegistering ? 'Criar Conta' : 'Entrar'}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 hover:bg-slate-100 rounded-md transition-colors"
-          >
+          <button onClick={handleClose} className="login-modal-close">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="login-modal-form">
           {isRegistering && (
-            <div className="space-y-2">
-              <label className="block mb-2 text-sm">Nome Completo</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <div>
+              <label className="login-modal-label">Nome Completo</label>
+              <div className="login-modal-group">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="text"
                   name="name"
@@ -57,16 +74,16 @@ export function LoginModal({ isOpen, onClose, onLogin }) {
                   onChange={handleChange}
                   placeholder="Seu nome"
                   required={isRegistering}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="login-modal-input"
                 />
               </div>
             </div>
           )}
 
-          <div className="space-y-2">
-            <label className="block mb-2 text-sm">E-mail</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <div>
+            <label className="login-modal-label">E-mail</label>
+            <div className="login-modal-group">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="email"
                 name="email"
@@ -74,33 +91,32 @@ export function LoginModal({ isOpen, onClose, onLogin }) {
                 onChange={handleChange}
                 placeholder="seu@email.com"
                 required
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="login-modal-input"
               />
             </div>
           </div>
 
           {isRegistering && (
-            <div className="space-y-2">
-              <label className="block mb-2 text-sm">Telefone</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <div>
+              <label className="login-modal-label">Telefone</label>
+              <div className="login-modal-group">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="(11) 98765-4321"
-                  required={isRegistering}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                  className="login-modal-input"
                 />
               </div>
             </div>
           )}
 
-          <div className="space-y-2">
-            <label className="block mb-2 text-sm">Senha</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <div>
+            <label className="login-modal-label">Senha</label>
+            <div className="login-modal-group">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="password"
                 name="password"
@@ -108,14 +124,18 @@ export function LoginModal({ isOpen, onClose, onLogin }) {
                 onChange={handleChange}
                 placeholder="••••••••"
                 required
-                className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="login-modal-input"
               />
             </div>
           </div>
 
+          {error && (
+            <p className="login-modal-error">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full py-3 bg-black text-white rounded-md hover:opacity-90 transition-opacity"
+            className="login-modal-submit"
           >
             {isRegistering ? 'Criar Conta' : 'Entrar'}
           </button>
@@ -123,13 +143,28 @@ export function LoginModal({ isOpen, onClose, onLogin }) {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => setIsRegistering(!isRegistering)}
-              className="text-sm text-slate-500 hover:text-slate-950 transition-colors"
+              onClick={() => { setIsRegistering(!isRegistering); setError(''); }}
+              className="login-modal-toggle"
             >
               {isRegistering ? 'Já tem uma conta? Entrar' : 'Não tem conta? Criar agora'}
             </button>
           </div>
         </form>
+
+        {!isRegistering && (
+          <div className="login-modal-demo">
+            <div className="login-modal-demo-box">
+              <div className="login-modal-demo-header">
+                <Shield className="w-4 h-4 text-muted-foreground" />
+                <p className="login-modal-demo-text">Contas de demonstração:</p>
+              </div>
+              <div className="login-modal-demo-text">
+                <p><span className="login-modal-demo-strong">Usuário:</span> joao@email.com / user123</p>
+                <p><span className="login-modal-demo-strong">Admin:</span> admin@autolink.com / admin123</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
