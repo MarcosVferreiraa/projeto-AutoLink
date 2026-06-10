@@ -1,44 +1,142 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
-export interface AuthUser {
-  id: number;
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  User,
+} from "firebase/auth";
+
+import {
+  doc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore";
+
+import { auth, db } from "../../firebase/firebase";
+
+interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
 }
 
 interface AuthContextType {
-  user: AuthUser | null;
-  login: (email: string, password: string) => { success: boolean; error?: string };
-  logout: () => void;
+  user: User | null;
+  userProfile: UserProfile | null;
+  login: (email: string, password: string) => Promise<any>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    phone: string
+  ) => Promise<any>;
+  logout: () => Promise<void>;
   isAdmin: boolean;
 }
 
-const MOCK_USERS = [
-  { id: 1, name: 'Administrador', email: 'admin@autolink.com', password: 'admin123', phone: '(11) 98765-4321', role: 'admin' as const },
-  { id: 2, name: 'João Silva', email: 'joao@email.com', password: 'user123', phone: '(11) 91234-5678', role: 'user' as const },
-];
+const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] =
+    useState<UserProfile | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  async function login(
+    email: string,
+    password: string
+  ) {
+    return await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+  }
 
-  const login = (email: string, password: string): { success: boolean; error?: string } => {
-    const found = MOCK_USERS.find(u => u.email === email && u.password === password);
-    if (found) {
-      const { password: _pw, ...userData } = found;
-      setUser(userData);
-      return { success: true };
-    }
-    return { success: false, error: 'E-mail ou senha incorretos' };
-  };
+  async function register(
+    name: string,
+    email: string,
+    password: string,
+    phone: string
+  ) {
+    const userCredential =
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-  const logout = () => setUser(null);
+    await setDoc(
+      doc(db, "users", userCredential.user.uid),
+      {
+        name,
+        email,
+        phone,
+        role: "user",
+        createdAt: new Date(),
+      }
+    );
+
+    return userCredential;
+  }
+
+  async function logout() {
+    await signOut(auth);
+  }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (firebaseUser) => {
+        setUser(firebaseUser);
+
+        if (firebaseUser) {
+          const userDoc = await getDoc(
+            doc(db, "users", firebaseUser.uid)
+          );
+
+          if (userDoc.exists()) {
+            setUserProfile(
+              userDoc.data() as UserProfile
+            );
+          } else {
+            setUserProfile(null);
+          }
+        } else {
+          setUserProfile(null);
+        }
+      }
+    );
+
+    return unsubscribe;
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userProfile,
+        login,
+        register,
+        logout,
+        isAdmin:
+          userProfile?.role === "admin",
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -46,6 +144,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within AuthProvider');
+
+  if (!context) {
+    throw new Error(
+      "useAuth must be used within AuthProvider"
+    );
+  }
+
   return context;
 }
