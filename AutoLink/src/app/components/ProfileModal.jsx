@@ -1,16 +1,110 @@
-import React from 'react';
 import { Link } from 'react-router';
-import { X, User, Mail, Phone, Heart, Car, Bell, Settings, LogOut } from 'lucide-react';
-export function ProfileModal({
-  isOpen,
-  onClose,
-  user,
-  onLogout
-}) {
-  if (!isOpen) return null;
+import { X, User, Mail, Phone, Heart, Car, LogOut, Shield } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useFavorites } from '../context/FavoritesContext';
+import { useProposals } from '../context/ProposalsContext';
+import './ProfileModal.css';
+
+export function ProfileModal({ isOpen, onClose }) {
+  const { user, logout, isAdmin } = useAuth();
+  const { favoriteIds } = useFavorites();
+  const { getUserProposals } = useProposals();
+
+  if (!isOpen || !user) return null;
+
+  const userProposals = getUserProposals(user.id);
+
   const handleLogout = () => {
-    onLogout();
+    logout();
     onClose();
   };
-  return <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"><div className="bg-card rounded-lg max-w-2xl w-full shadow-xl max-h-[90vh] overflow-y-auto"><div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card"><h2>Meu Perfil</h2><button onClick={onClose} className="p-1 hover:bg-muted rounded-md transition-colors"><X className="w-5 h-5" /></button></div><div className="p-6"><div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-lg p-6 mb-6"><div className="flex items-center gap-4"><div className="w-16 h-16 bg-primary-foreground/20 rounded-full flex items-center justify-center"><User className="w-8 h-8" /></div><div><h3 className="text-xl mb-1">{user.name}</h3><p className="text-primary-foreground/80">Cliente Premium</p></div></div></div>{/* Contact Information */}<div className="mb-6"><h3 className="mb-4">Informações de Contato</h3><div className="space-y-3"><div className="flex items-center gap-3 p-3 bg-muted rounded-md"><Mail className="w-5 h-5 text-muted-foreground" /><div><p className="text-sm text-muted-foreground">E-mail</p><p>{user.email}</p></div></div><div className="flex items-center gap-3 p-3 bg-muted rounded-md"><Phone className="w-5 h-5 text-muted-foreground" /><div><p className="text-sm text-muted-foreground">Telefone</p><p>{user.phone || 'Não informado'}</p></div></div></div></div>{/* Quick Stats */}<div className="grid grid-cols-3 gap-4 mb-6"><Link to="/favoritos" onClick={onClose} className="bg-muted rounded-lg p-4 text-center hover:bg-muted/80 transition-colors"><Heart className="w-6 h-6 mx-auto mb-2 text-destructive" /><p className="text-2xl mb-1">3</p><p className="text-sm text-muted-foreground">Favoritos</p></Link><Link to="/propostas" onClick={onClose} className="bg-muted rounded-lg p-4 text-center hover:bg-muted/80 transition-colors"><Car className="w-6 h-6 mx-auto mb-2 text-primary" /><p className="text-2xl mb-1">1</p><p className="text-sm text-muted-foreground">Propostas</p></Link><div className="bg-muted rounded-lg p-4 text-center"><Bell className="w-6 h-6 mx-auto mb-2 text-accent-foreground" /><p className="text-2xl mb-1">2</p><p className="text-sm text-muted-foreground">Alertas</p></div></div>{/* Menu Options */}<div className="space-y-2 mb-6"><Link to="/favoritos" onClick={onClose} className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-md transition-colors text-left"><Heart className="w-5 h-5 text-muted-foreground" /><span>Carros Favoritos</span></Link><Link to="/propostas" onClick={onClose} className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-md transition-colors text-left"><Car className="w-5 h-5 text-muted-foreground" /><span>Minhas Propostas</span></Link><button className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-md transition-colors text-left"><Bell className="w-5 h-5 text-muted-foreground" /><span>Notificações</span></button><button className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-md transition-colors text-left"><Settings className="w-5 h-5 text-muted-foreground" /><span>Configurações</span></button></div>{/* Logout Button */}<button onClick={handleLogout} className="w-full flex items-center justify-center gap-3 p-3 bg-destructive text-destructive-foreground rounded-md hover:opacity-90 transition-opacity"><LogOut className="w-5 h-5" /><span>Sair da Conta</span></button></div></div></div>;
+
+  return (
+    <div className="profile-modal-overlay">
+      <div className="profile-modal-panel">
+        <div className="profile-modal-header">
+          <h2>Meu Perfil</h2>
+          <button onClick={onClose} className="profile-modal-close">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="profile-modal-content">
+          <div className="profile-modal-banner">
+            <div className="profile-modal-banner-row">
+              <div className="profile-modal-avatar">
+                {isAdmin ? <Shield className="w-8 h-8" /> : <User className="w-8 h-8" />}
+              </div>
+              <div>
+                <h3 className="profile-modal-name">{user.name}</h3>
+                <p className="profile-modal-role">{isAdmin ? 'Administrador' : 'Cliente Premium'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="profile-modal-section">
+            <h3 className="profile-modal-section-title">Informações de Contato</h3>
+            <div className="space-y-3">
+              <div className="profile-modal-contact-card">
+                <Mail className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="profile-modal-contact-label">E-mail</p>
+                  <p>{user.email}</p>
+                </div>
+              </div>
+              <div className="profile-modal-contact-card">
+                <Phone className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="profile-modal-contact-label">Telefone</p>
+                  <p>{user.phone || 'Não informado'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {!isAdmin && (
+            <div className="profile-modal-grid">
+              <Link to="/favoritos" onClick={onClose} className="profile-modal-card-link">
+                <Heart className="profile-modal-card-link-icon text-destructive" />
+                <p className="profile-modal-card-link-meta">{favoriteIds.length}</p>
+                <p className="profile-modal-card-link-text">Favoritos</p>
+              </Link>
+              <Link to="/propostas" onClick={onClose} className="profile-modal-card-link">
+                <Car className="profile-modal-card-link-icon text-primary" />
+                <p className="profile-modal-card-link-meta">{userProposals.length}</p>
+                <p className="profile-modal-card-link-text">Propostas</p>
+              </Link>
+            </div>
+          )}
+
+          <div className="profile-modal-link-list">
+            <Link to="/favoritos" onClick={onClose} className="profile-modal-link-item">
+              <Heart className="w-5 h-5 text-muted-foreground" />
+              <span>Carros Favoritos</span>
+            </Link>
+            {!isAdmin && (
+              <Link to="/propostas" onClick={onClose} className="profile-modal-link-item">
+                <Car className="w-5 h-5 text-muted-foreground" />
+                <span>Minhas Propostas</span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link to="/admin/propostas" onClick={onClose} className="profile-modal-link-item">
+                <Shield className="w-5 h-5 text-muted-foreground" />
+                <span>Gerenciar Propostas</span>
+              </Link>
+            )}
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="profile-modal-logout"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Sair da Conta</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

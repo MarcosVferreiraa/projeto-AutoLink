@@ -1,0 +1,51 @@
+.filter-sidebar {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.filter-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.filter-sidebar-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.filter-sidebar-relative {
+  position: relative;
+}
+
+.filter-sidebar-input,
+.filter-sidebar-select {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: var(--color-input-background);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.filter-sidebar-input:focus,
+.filter-sidebar-select:focus {
+  box-shadow: 0 0 0 2px var(--color-ring);
+}
+
+.filter-sidebar-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
