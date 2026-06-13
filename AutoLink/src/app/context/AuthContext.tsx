@@ -41,11 +41,17 @@ interface AuthContextType {
   ) => Promise<any>;
   logout: () => Promise<void>;
   isAdmin: boolean;
+
+  sessionExpired: boolean;
+  countdown: number;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(
   undefined
-);
+); 
+                 // 60 minutos
+
+const SESSION_DURATION = 1 * 60 * 1000;         
 
 export function AuthProvider({
   children,
@@ -55,6 +61,12 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] =
     useState<UserProfile | null>(null);
+
+    const [sessionExpired, setSessionExpired] =
+  useState(false);
+
+const [countdown, setCountdown] =
+  useState(3);
 
   async function login(
     email: string,
@@ -118,6 +130,7 @@ export function AuthProvider({
           }
         } else {
           setUserProfile(null);
+          
         }
       }
     );
@@ -125,23 +138,62 @@ export function AuthProvider({
     return unsubscribe;
   }, []);
 
+               // AUTO LOGOUT APÓS 60 MINUTOS
+  useEffect(() => {
+  if (!user) return;
+
+  let interval: NodeJS.Timeout;
+
+  const timeout = setTimeout(() => {
+    setSessionExpired(true);
+
+    let seconds = 3;
+
+    interval = setInterval(async () => {
+      seconds--;
+
+      setCountdown(seconds);
+
+      if (seconds <= 0) {
+        clearInterval(interval);
+
+        setSessionExpired(false);
+
+        await signOut(auth);
+
+        setCountdown(3);
+      }
+    }, 1000);
+  }, SESSION_DURATION);
+
+  return () => {
+    clearTimeout(timeout);
+
+    if (interval) {
+      clearInterval(interval);
+    }
+  };
+}, [user]);
+
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        userProfile,
-        login,
-        register,
-        logout,
-        isAdmin:
-          userProfile?.role === "admin",
-      }}
-    >
+  value={{
+    user,
+    userProfile,
+    login,
+    register,
+    logout,
+    isAdmin:
+      userProfile?.role === "admin",
+
+    sessionExpired,
+    countdown,
+  }}
+>
       {children}
     </AuthContext.Provider>
   );
 }
-
 export function useAuth() {
   const context = useContext(AuthContext);
 
