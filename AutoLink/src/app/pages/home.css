@@ -1,0 +1,23 @@
+.floating-add-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 68px;
+  height: 68px;
+  background-color: #111827;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 10px 25px rgba(17, 24, 39, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floating-add-btn:hover {
+  background-color: #1f2937;
+  transform: scale(1.08);
+}

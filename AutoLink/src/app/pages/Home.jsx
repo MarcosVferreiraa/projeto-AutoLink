@@ -6,12 +6,15 @@ import { AddCarModal } from '../components/AddCarModal';
 import { useCars } from '../context/CarContext';
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
+import "./home.css"; 
 
 export function Home() {
   const navigate = useNavigate();
   const { cars, addCar, removeCar } = useCars();
   const { isAdmin } = useAuth();
+  
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
+  
   const [filters, setFilters] = useState({
     search: '',
     brand: '',
@@ -27,6 +30,7 @@ export function Home() {
     const matchesSearch = filters.search === '' ||
       car.brand.toLowerCase().includes(filters.search.toLowerCase()) ||
       car.model.toLowerCase().includes(filters.search.toLowerCase());
+    
     const matchesBrand = filters.brand === '' || car.brand === filters.brand;
     const matchesMinPrice = filters.minPrice === '' || car.price >= Number(filters.minPrice);
     const matchesMaxPrice = filters.maxPrice === '' || car.price <= Number(filters.maxPrice);
@@ -34,6 +38,7 @@ export function Home() {
     const matchesMaxYear = filters.maxYear === '' || car.year <= Number(filters.maxYear);
     const matchesFuel = filters.fuel === '' || car.fuel === filters.fuel;
     const matchesTransmission = filters.transmission === '' || car.transmission === filters.transmission;
+
     return matchesSearch && matchesBrand && matchesMinPrice && matchesMaxPrice &&
            matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
   });
@@ -46,16 +51,14 @@ export function Home() {
         onAddCar={addCar}
       />
 
-      {/* Floating Add Button — admin only */}
-      {isAdmin && (
-        <button
-          onClick={() => setIsAddCarModalOpen(true)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center z-40"
-          aria-label="Adicionar carro"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
-      )}
+      {/* Botão Flutuante - Adicionar Carro (visível para todos) */}
+      <button
+        onClick={() => setIsAddCarModalOpen(true)}
+        className="floating-add-btn"
+        aria-label="Adicionar carro"
+      >
+        <Plus size={28} />
+      </button>
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
