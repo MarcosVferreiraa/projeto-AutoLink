@@ -1,19 +1,89 @@
 import { Shield, Clock, CheckCircle, XCircle, Check, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProposals } from '../context/ProposalsContext';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+
+import { db } from "../../firebase/firebase";
 
 export function AdminProposals() {
   const { user, isAdmin } = useAuth();
   const { proposals, acceptProposal, rejectProposal } = useProposals();
   const navigate = useNavigate();
+  const [pendingAdmins, setPendingAdmins] =
+  useState <any[]>([]);
+  async function loadPendingAdmins() {
+  try {
+    const q = query(
+      collection(db, 'users'),
+      where('role', '==', 'pending_admin')
+    );
+
+    const snapshot = await getDocs(q);
+
+    const users = snapshot.docs.map((docItem) => ({
+      id: docItem.id,
+      ...docItem.data(),
+    }));
+
+    setPendingAdmins(users);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function approveAdmin(userId: string) {
+  try {
+    await updateDoc(
+      doc(db, "users", userId),
+      {
+        role: "admin",
+        approved: true,
+      }
+    );
+
+    setPendingAdmins(prev =>
+      prev.filter(admin => admin.id !== userId)
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function rejectAdmin(userId: string) {
+  try {
+    await updateDoc(
+      doc(db, 'users', userId),
+      {
+        role: 'user',
+        approved: false,
+      }
+    );
+  setPendingAdmins(prev =>
+      prev.filter(admin => admin.id !== userId)
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 
   useEffect(() => {
-    if (!user || !isAdmin) {
-      navigate('/');
-    }
-  }, [user, isAdmin, navigate]);
+  if (!user || !isAdmin) {
+    navigate('/');
+    return;
+  }
+
+  loadPendingAdmins();
+}, [user, isAdmin, navigate]);
 
   if (!user || !isAdmin) return null;
 
@@ -62,7 +132,72 @@ export function AdminProposals() {
             </span>
           )}
         </p>
+
       </div>
+      <div className="mb-10">
+  <div className="flex items-center gap-3 mb-4">
+    <Shield className="w-6 h-6 text-primary" />
+
+    <h2 className="text-2xl">
+      Pedidos de Administrador
+    </h2>
+  </div>
+
+  {pendingAdmins.length === 0 ? (
+    <div className="bg-card border border-border rounded-lg p-6">
+      <p className="text-muted-foreground">
+        Nenhum pedido pendente.
+      </p>
+    </div>
+  ) : (
+    <div className="space-y-4">
+      {pendingAdmins.map((admin) => (
+        <div
+          key={admin.id}
+          className="bg-card border border-border rounded-lg p-6"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg">
+                {admin.name}
+              </h3>
+
+              <p className="text-muted-foreground">
+                {admin.email}
+              </p>
+
+              {admin.phone && (
+                <p className="text-muted-foreground">
+                  {admin.phone}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() =>
+                  approveAdmin(admin.id)
+                }
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Aprovar
+              </button>
+
+              <button
+                onClick={() =>
+                  rejectAdmin(admin.id)
+                }
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Recusar
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">

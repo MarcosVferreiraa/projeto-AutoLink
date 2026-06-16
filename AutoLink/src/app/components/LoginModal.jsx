@@ -14,6 +14,7 @@ export function LoginModal({ isOpen, onClose }) {
     email: "",
     password: "",
     phone: "",
+    role: "user", 
   });
 
   if (!isOpen) return null;
@@ -27,18 +28,19 @@ export function LoginModal({ isOpen, onClose }) {
     setError("");
   };
 
-  const handleClose = () => {
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      phone: "",
-    });
+ const handleClose = () => {
+  setFormData({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    role: "user",
+  });
 
-    setError("");
-    setIsRegistering(false);
-    onClose();
-  };
+  setError("");
+  setIsRegistering(false);
+  onClose();
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +53,8 @@ export function LoginModal({ isOpen, onClose }) {
           formData.name,
           formData.email,
           formData.password,
-          formData.phone
+          formData.phone,
+          formData.role,
         );
 
         handleClose();
@@ -190,6 +193,37 @@ export function LoginModal({ isOpen, onClose }) {
               </div>
             </div>
           )}
+
+          {isRegistering && (
+  <div>
+    <label className="login-modal-label">
+      Tipo de Conta
+    </label>
+
+    <div className="login-modal-group">
+      <select
+        name="role"
+        value={formData.role}
+        onChange={handleChange}
+        className="login-modal-input"
+      >
+        <option value="user">
+          Utilizador
+        </option>
+
+        <option value="pending_admin">
+          Solicitar Administrador
+        </option>
+      </select>
+    </div>
+      {formData.role === "pending_admin" && (
+      <p className="text-sm text-yellow-600 mt-2">
+        A sua conta precisará ser aprovada por um administrador.
+      </p>
+    )}
+  </div>
+)}
+
 
           <div>
             <label className="login-modal-label">

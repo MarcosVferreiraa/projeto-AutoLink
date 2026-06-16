@@ -26,7 +26,8 @@ interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: "admin" | "user";
+  role: "user" | "admin" | "pending_admin";
+  approved?: boolean;
 }
 
 interface AuthContextType {
@@ -34,11 +35,12 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   login: (email: string, password: string) => Promise<any>;
   register: (
-    name: string,
-    email: string,
-    password: string,
-    phone: string
-  ) => Promise<any>;
+  name: string,
+  email: string,
+  password: string,
+  phone: string,
+  role: "user" | "pending_admin"
+) => Promise<any>;
   logout: () => Promise<void>;
   isAdmin: boolean;
 
@@ -51,7 +53,7 @@ const AuthContext = createContext<AuthContextType | undefined>(
 ); 
                  // 60 minutos
 
-const SESSION_DURATION = 1 * 60 * 1000;         
+const SESSION_DURATION = 60 * 60 * 1000;         
 
 export function AuthProvider({
   children,
@@ -80,32 +82,33 @@ const [countdown, setCountdown] =
   }
 
   async function register(
-    name: string,
-    email: string,
-    password: string,
-    phone: string
-  ) {
-    const userCredential =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-    await setDoc(
-      doc(db, "users", userCredential.user.uid),
-      {
-        name,
-        email,
-        phone,
-        role: "user",
-        createdAt: new Date(),
-      }
+  name: string,
+  email: string,
+  password: string,
+  phone: string,
+  role: "user" | "pending_admin"
+) {
+  const userCredential =
+    await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
     );
 
-    return userCredential;
-  }
+  await setDoc(
+    doc(db, "users", userCredential.user.uid),
+    {
+      name,
+      email,
+      phone,
+      role,
+      approved: false,
+      createdAt: new Date(),
+    }
+  );
 
+  return userCredential;
+}
   async function logout() {
     await signOut(auth);
   }

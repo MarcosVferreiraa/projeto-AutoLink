@@ -8,7 +8,7 @@ export interface Proposal {
   carYear: number;
   carImage: string;
   carPrice: number;
-  userId: number;
+  userId: string;
   userName: string;
   proposedPrice: number;
   message: string;
@@ -22,8 +22,8 @@ interface ProposalsContextType {
   cancelProposal: (id: number) => void;
   acceptProposal: (id: number) => void;
   rejectProposal: (id: number) => void;
-  getUserProposals: (userId: number) => Proposal[];
-  hasProposalForCar: (carId: number, userId: number) => boolean;
+  getUserProposals: (userId: string) => Proposal[];
+  hasProposalForCar: (carId: number, userId: string) => boolean;
 }
 
 const ProposalsContext = createContext<ProposalsContextType | undefined>(undefined);
@@ -38,7 +38,7 @@ export const ProposalsProvider = ({ children }: { children: ReactNode }) => {
       carYear: 2021,
       carImage: 'https://images.unsplash.com/photo-1618642624018-a370cbf3cd80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
       carPrice: 185000,
-      userId: 2,
+      userId:"demo-user",
       userName: 'João Silva',
       proposedPrice: 175000,
       message: 'Tenho interesse no veículo. Posso pagar à vista.',
@@ -53,7 +53,7 @@ export const ProposalsProvider = ({ children }: { children: ReactNode }) => {
       carYear: 2021,
       carImage: 'https://images.unsplash.com/photo-1574023240744-64c47c8c0676?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
       carPrice: 125000,
-      userId: 2,
+      userId: "demo-user",
       userName: 'João Silva',
       proposedPrice: 118000,
       message: 'Gostei muito do carro, podemos negociar?',
@@ -85,9 +85,9 @@ export const ProposalsProvider = ({ children }: { children: ReactNode }) => {
     setProposals(prev => prev.map(p => p.id === id ? { ...p, status: 'rejected' as const } : p));
   };
 
-  const getUserProposals = (userId: number) => proposals.filter(p => p.userId === userId);
+  const getUserProposals = (userId: string) => proposals.filter(p => p.userId === userId);
 
-  const hasProposalForCar = (carId: number, userId: number) =>
+  const hasProposalForCar = (carId: number, userId: string) =>
     proposals.some(p => p.carId === carId && p.userId === userId && p.status === 'pending');
 
   return (
