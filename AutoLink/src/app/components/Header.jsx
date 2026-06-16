@@ -15,6 +15,7 @@ import "./Header.css";
 export function Header({
   onLoginClick,
   onProfileClick,
+  onOpenAddCar,
 }) {
   const {
     user,
@@ -80,6 +81,15 @@ export function Header({
                 Painel Admin
               </Link>
             )}
+            {isAdmin && (
+  <button
+    onClick={onOpenAddCar}
+    className="header-admin-link"
+  >
+    <Car className="w-4 h-4" />
+    Adicionar Carro
+  </button>
+)}
 
             <Link
               to="/financiamento"
