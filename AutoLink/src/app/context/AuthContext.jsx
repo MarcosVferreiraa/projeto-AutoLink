@@ -20,85 +20,192 @@ import {
 
 import { auth, db } from "../../firebase/firebase";
 
-const AuthContext = createContext(undefined); 
+const AuthContext = createContext(undefined);
 
-const SESSION_DURATION = 60 * 60 * 1000; // 60 minutos        
+const SESSION_DURATION = 60 * 60 * 1000; // 60 min
 
 export function AuthProvider({ children }) {
-  // Começa como null para testares o fluxo do Modal de Login normalmente
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
 
-  const [sessionExpired, setSessionExpired] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [sessionExpired, setSessionExpired] =
+    useState(false);
 
-  // =======================================================
-  // LOGIN INTELI-BYPASS: ADM COMPATÍVEL COM MIN 6 DÍGITOS
-  // =======================================================
+  const [countdown, setCountdown] =
+    useState(3);
+
+  // =========================
+  // LOGIN
+  // =========================
   async function login(email, password) {
-    // Definimos a credencial com a senha de 6 dígitos '123456'
-    if (email === "admin@stand.com" && password === "123456") {
-      const mockAdminUser = { uid: "admin-fixo-desenvolvimento-123" };
+    // ADMIN FIXO PARA DESENVOLVIMENTO
+    if (
+      email === "admin@stand.com" &&
+      password === "123456"
+    ) {
+      const mockAdminUser = {
+        uid: "admin-fixo-desenvolvimento-123",
+      };
+
       const mockAdminProfile = {
         name: "Administrador Geral",
         email: "admin@stand.com",
-        phoneNumber: "912345678",
-        userType: "admin" // Mantém alinhado com o teu Register.jsx
+        phone: "912345678",
+        role: "admin",
+        approved: true,
       };
 
       setUser(mockAdminUser);
       setUserProfile(mockAdminProfile);
-      
-      // Retorna a estrutura que o teu modal espera receber para fechar o login com sucesso
-      return { user: mockAdminUser };
+
+      return {
+        user: mockAdminUser,
+      };
     }
 
-    // Se NÃO forem as credenciais acima, segue o fluxo normal do Firebase local
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    return cred;
-  }
-
-  async function register(name, email, password, phoneNumber) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "users", cred.user.uid), {
-      uid: cred.user.uid,
+    return await signInWithEmailAndPassword(
+      auth,
       email,
-      name,
-      phoneNumber,
-      userType: "customer",
-    });
-    return cred;
+      password
+    );
   }
 
+  // =========================
+  // REGISTRO
+  // =========================
+  async function register(
+    name,
+    email,
+    password,
+    phone,
+    role = "user"
+  ) {
+    const userCredential =
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+    await setDoc(
+      doc(
+        db,
+        "users",
+        userCredential.user.uid
+      ),
+      {
+        uid: userCredential.user.uid,
+        name,
+        email,
+        phone,
+        role,
+        approved: false,
+        createdAt: new Date(),
+      }
+    );
+
+    return userCredential;
+  }
+
+  // =========================
+  // LOGOUT
+  // =========================
   async function logout() {
     await signOut(auth);
+
     setUser(null);
     setUserProfile(null);
+
+    setSessionExpired(false);
+    setCountdown(3);
   }
 
-  // OBSERVADOR DO ESTADO DO FIREBASE AJUSTADO PARA EVITAR CONFLITOS
+  // =========================
+  // AUTH OBSERVER
+  // =========================
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      // Se for o nosso Admin fixo de desenvolvimento, ignora o Firebase para não deslogar
-      if (user?.uid === "admin-fixo-desenvolvimento-123") return;
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        async (firebaseUser) => {
+          // Ignora Firebase quando
+          // estiver usando admin fake
+          if (
+            user?.uid ===
+            "admin-fixo-desenvolvimento-123"
+          ) {
+            return;
+          }
 
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data());
-        } else {
-          setUserProfile(null);
+          if (firebaseUser) {
+            setUser(firebaseUser);
+
+            const userDoc =
+              await getDoc(
+                doc(
+                  db,
+                  "users",
+                  firebaseUser.uid
+                )
+              );
+
+            if (userDoc.exists()) {
+              setUserProfile(
+                userDoc.data()
+              );
+            } else {
+              setUserProfile(null);
+            }
+          } else {
+            setUser(null);
+            setUserProfile(null);
+          }
         }
-      } else {
-        // Só limpa o estado se quem saiu NÃO foi o Admin fixo simulado
-        if (user?.uid !== "admin-fixo-desenvolvimento-123") {
+      );
+
+    return unsubscribe;
+  }, [user]);
+
+  // =========================
+  // AUTO LOGOUT
+  // =========================
+  useEffect(() => {
+    if (!user) return;
+
+    let interval;
+
+    const timeout = setTimeout(() => {
+      setSessionExpired(true);
+
+      let seconds = 3;
+
+      interval = setInterval(async () => {
+        seconds--;
+
+        setCountdown(seconds);
+
+        if (seconds <= 0) {
+          clearInterval(interval);
+
+          setSessionExpired(false);
+
+          await signOut(auth);
+
           setUser(null);
           setUserProfile(null);
+
+          setCountdown(3);
         }
+      }, 1000);
+    }, SESSION_DURATION);
+
+    return () => {
+      clearTimeout(timeout);
+
+      if (interval) {
+        clearInterval(interval);
       }
-    });
-    return unsubscribe;
+    };
   }, [user]);
 
   return (
@@ -109,8 +216,11 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
-        // Libera as travas baseadas na flag correta do banco do seu projeto
-        isAdmin: userProfile?.userType === "admin", 
+
+        isAdmin:
+          userProfile?.role ===
+          "admin",
+
         sessionExpired,
         countdown,
       }}
@@ -121,9 +231,14 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
+
   if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+    throw new Error(
+      "useAuth deve ser usado dentro de AuthProvider"
+    );
   }
+
   return context;
 }
