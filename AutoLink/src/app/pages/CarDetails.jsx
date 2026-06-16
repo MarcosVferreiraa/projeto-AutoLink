@@ -13,7 +13,7 @@ export function CarDetails() {
   const { user, isAdmin } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addProposal, hasProposalForCar } = useProposals();
-  const car = getCarById(Number(id));
+  const car = getCarById(id);
 
   const [showProposalForm, setShowProposalForm] = useState(false);
   const [proposedPrice, setProposedPrice] = useState('');
