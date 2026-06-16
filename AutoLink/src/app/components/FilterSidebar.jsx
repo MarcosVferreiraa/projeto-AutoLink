@@ -2,9 +2,14 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import './FilterSidebar.css';
 
 export function FilterSidebar({ onFilterChange }) {
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-    onFilterChange((prev) => ({ ...prev, [name]: value }));
+    // Atualiza o estado "filters" dentro do componente Pai (Home.jsx)
+    onFilterChange((prev) => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -15,6 +20,7 @@ export function FilterSidebar({ onFilterChange }) {
       </div>
 
       <div className="filter-sidebar-section">
+        {/* Campo de pesquisa de texto livre */}
         <div>
           <label className="filter-sidebar-label">Buscar</label>
           <div className="filter-sidebar-relative">
@@ -29,6 +35,7 @@ export function FilterSidebar({ onFilterChange }) {
           </div>
         </div>
 
+        {/* Menu de seleção de marcas */}
         <div>
           <label className="filter-sidebar-label">Marca</label>
           <select
@@ -48,8 +55,9 @@ export function FilterSidebar({ onFilterChange }) {
           </select>
         </div>
 
+        {/* Filtros de Intervalo de Preços */}
         <div>
-          <label className="filter-sidebar-label">Faixa de Preço</label>
+          <label className="filter-sidebar-label">Faixa de Preço (R$)</label>
           <div className="filter-sidebar-grid">
             <input
               type="number"
@@ -68,8 +76,9 @@ export function FilterSidebar({ onFilterChange }) {
           </div>
         </div>
 
+        {/* Filtros de Intervalo de Anos */}
         <div>
-          <label className="filter-sidebar-label">Ano</label>
+          <label className="filter-sidebar-label">Ano Modelo</label>
           <div className="filter-sidebar-grid">
             <input
               type="number"
@@ -88,6 +97,7 @@ export function FilterSidebar({ onFilterChange }) {
           </div>
         </div>
 
+        {/* Tipo de combustível */}
         <div>
           <label className="filter-sidebar-label">Combustível</label>
           <select
@@ -104,6 +114,7 @@ export function FilterSidebar({ onFilterChange }) {
           </select>
         </div>
 
+        {/* Tipo de caixa / transmissão */}
         <div>
           <label className="filter-sidebar-label">Câmbio</label>
           <select

@@ -2,29 +2,7 @@ import { X, Upload } from "lucide-react";
 import { useState } from "react";
 import styles from './AddCarModal.module.css';
 
-interface AddCarModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddCar: (car: {
-    image: string;
-    brand: string;
-    model: string;
-    year: number;
-    price: number;
-    mileage: number;
-    fuel: string;
-    transmission: string;
-    color: string;
-    description: string;
-    features: string[];
-  }) => void;
-}
-
-export function AddCarModal({
-  isOpen,
-  onClose,
-  onAddCar,
-}: AddCarModalProps) {
+export function AddCarModal({ isOpen, onClose, onAddCar }) {
   const [formData, setFormData] = useState({
     image: "",
     brand: "",
@@ -41,7 +19,7 @@ export function AddCarModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const featuresArray = formData.features
@@ -71,11 +49,7 @@ export function AddCarModal({
     onClose();
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,

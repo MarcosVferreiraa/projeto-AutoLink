@@ -1,22 +1,23 @@
 .profile-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 1000;
   padding: 1rem;
 }
 
 .profile-modal-panel {
-  background: var(--color-card);
+  background: #ffffff !important;
   border-radius: 1rem;
   width: 100%;
   max-width: 56rem;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
   max-height: 90vh;
   overflow-y: auto;
+  border: 1px solid #e5e7eb;
 }
 
 .profile-modal-header {
@@ -24,10 +25,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid #e5e7eb;
   position: sticky;
   top: 0;
-  background: var(--color-card);
+  background: #ffffff !important;
+  z-index: 10;
 }
 
 .profile-modal-close {
@@ -40,16 +42,30 @@
 }
 
 .profile-modal-close:hover {
-  background: var(--color-muted);
+  background: #f3f4f6;
 }
 
+/* Botões em Preto */
+.profile-modal-logout,
+.profile-modal-card-link {
+  background: #111827 !important;
+  color: white;
+  border: none;
+}
+
+.profile-modal-logout:hover,
+.profile-modal-card-link:hover {
+  background: #1f2937 !important;
+}
+
+/* Outros estilos */
 .profile-modal-content {
   padding: 1.5rem;
 }
 
 .profile-modal-banner {
-  background: linear-gradient(135deg, var(--color-primary), rgba(3, 2, 19, 0.5));
-  color: var(--color-primary-foreground);
+  background: linear-gradient(135deg, #111827, #1f2937);
+  color: white;
   border-radius: 1rem;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -64,28 +80,11 @@
 .profile-modal-avatar {
   width: 4rem;
   height: 4rem;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.profile-modal-name {
-  font-size: 1.125rem;
-  margin-bottom: 0.25rem;
-}
-
-.profile-modal-role {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.profile-modal-section {
-  margin-bottom: 1.5rem;
-}
-
-.profile-modal-section-title {
-  margin-bottom: 1rem;
 }
 
 .profile-modal-contact-card {
@@ -93,14 +92,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: var(--color-muted);
+  background: #f8fafc;
   border-radius: 0.75rem;
-}
-
-.profile-modal-contact-label {
-  font-size: 0.875rem;
-  color: var(--color-muted-foreground);
-  margin-bottom: 0.25rem;
+  border: 1px solid #e5e7eb;
 }
 
 .profile-modal-grid {
@@ -111,35 +105,14 @@
 }
 
 .profile-modal-card-link {
-  background: var(--color-muted);
+  background: #111827;
+  color: white;
   border-radius: 1rem;
-  padding: 1rem;
+  padding: 1.25rem;
   text-align: center;
   display: block;
-  transition: background 0.2s ease;
-  color: inherit;
+  transition: all 0.2s ease;
   text-decoration: none;
-}
-
-.profile-modal-card-link:hover {
-  background: rgba(236, 236, 240, 0.8);
-}
-
-.profile-modal-card-link-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  margin: 0 auto 0.5rem;
-  display: block;
-}
-
-.profile-modal-card-link-meta {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.profile-modal-card-link-text {
-  font-size: 0.875rem;
-  color: var(--color-muted-foreground);
 }
 
 .profile-modal-link-list {
@@ -162,7 +135,7 @@
 }
 
 .profile-modal-link-item:hover {
-  background: var(--color-muted);
+  background: #f8fafc;
 }
 
 .profile-modal-logout {
@@ -171,15 +144,16 @@
   justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem;
-  background: var(--color-destructive);
-  color: var(--color-destructive-foreground);
+  padding: 0.85rem;
+  background: #111827;
+  color: white;
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .profile-modal-logout:hover {
-  opacity: 0.9;
+  background: #1f2937;
 }
