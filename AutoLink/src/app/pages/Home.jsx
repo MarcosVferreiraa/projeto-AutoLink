@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CarCard } from '../components/CarCard';
 import { AddCarModal } from '../components/AddCarModal';
-import { useCars } from '../context/CarContext';
+import { useCars } from '../context/CarContext'
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
 import "./home.css"; 
@@ -15,6 +15,7 @@ export function Home() {
   
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
   
+  // Estado para os filtros da Sidebar lateral esquerda
   const [filters, setFilters] = useState({
     search: '',
     brand: '',
@@ -26,21 +27,46 @@ export function Home() {
     transmission: ''
   });
 
+  // ESTADO DO FILTRO DA DIREITA: Guarda o critério de ordenação selecionado
+  const [sortCriterion, setSortCriterion] = useState('');
+
+  // 1. Primeiro aplicamos os filtros da Sidebar esquerda
   const filteredCars = cars.filter(car => {
     const matchesSearch = filters.search === '' ||
-      car.brand.toLowerCase().includes(filters.search.toLowerCase()) ||
-      car.model.toLowerCase().includes(filters.search.toLowerCase());
+      (car.brand && car.brand.toLowerCase().includes(filters.search.toLowerCase())) ||
+      (car.model && car.model.toLowerCase().includes(filters.search.toLowerCase()));
     
     const matchesBrand = filters.brand === '' || car.brand === filters.brand;
-    const matchesMinPrice = filters.minPrice === '' || car.price >= Number(filters.minPrice);
-    const matchesMaxPrice = filters.maxPrice === '' || car.price <= Number(filters.maxPrice);
-    const matchesMinYear = filters.minYear === '' || car.year >= Number(filters.minYear);
-    const matchesMaxYear = filters.maxYear === '' || car.year <= Number(filters.maxYear);
+    
+    const matchesMinPrice = filters.minPrice === '' || Number(car.price) >= Number(filters.minPrice);
+    const matchesMaxPrice = filters.maxPrice === '' || Number(car.price) <= Number(filters.maxPrice);
+    
+    const matchesMinYear = filters.minYear === '' || Number(car.year) >= Number(filters.minYear);
+    const matchesMaxYear = filters.maxYear === '' || Number(car.year) <= Number(filters.maxYear);
+    
     const matchesFuel = filters.fuel === '' || car.fuel === filters.fuel;
     const matchesTransmission = filters.transmission === '' || car.transmission === filters.transmission;
 
     return matchesSearch && matchesBrand && matchesMinPrice && matchesMaxPrice &&
            matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
+  });
+
+  // 2. Agora aplicamos a ordenação do filtro da direita nos carros filtrados
+  const sortedAndFilteredCars = [...filteredCars].sort((a, b) => {
+    if (sortCriterion === 'Preço (menor)') {
+      return Number(a.price) - Number(b.price);
+    }
+    if (sortCriterion === 'Preço (maior)') {
+      return Number(b.price) - Number(a.price);
+    }
+    if (sortCriterion === 'Ano (mais novo)') {
+      return Number(b.year) - Number(a.year);
+    }
+    if (sortCriterion === 'Km (menor)') {
+      // Como o banco usa 'mileage', ordenamos por ela
+      return Number(a.mileage) - Number(b.mileage);
+    }
+    return 0; // Sem ordenação (padrão)
   });
 
   return (
@@ -51,7 +77,7 @@ export function Home() {
         onAddCar={addCar}
       />
 
-      {/* Botão Flutuante - Adicionar Carro (visível para todos) */}
+      {/* Botão Flutuante */}
       <button
         onClick={() => setIsAddCarModalOpen(true)}
         className="floating-add-btn"
@@ -100,20 +126,29 @@ export function Home() {
               <div>
                 <h2>Carros Disponíveis</h2>
                 <p className="text-muted-foreground">
-                  {filteredCars.length} {filteredCars.length === 1 ? 'veículo encontrado' : 'veículos encontrados'}
+                  {sortedAndFilteredCars.length} {sortedAndFilteredCars.length === 1 ? 'veículo encontrado' : 'veículos encontrados'}
                 </p>
               </div>
-              <select className="px-4 py-2 bg-card border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring">
-                <option>Ordenar por: Menor preço</option>
-                <option>Ordenar por: Maior preço</option>
-                <option>Ordenar por: Ano (mais novo)</option>
-                <option>Ordenar por: Km (menor)</option>
-              </select>
+
+              {/* O FILTRO DA DIREITA QUE TINHA SUMIDO DE VOLTA AQUI: */}
+              <div className="flex items-center gap-2">
+                <select 
+                  className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  value={sortCriterion}
+                  onChange={(e) => setSortCriterion(e.target.value)}
+                >
+                  <option value="">Ordenar por: Padrão</option>
+                  <option value="Preço (menor)">Ordenar por: Preço (menor)</option>
+                  <option value="Preço (maior)">Ordenar por: Preço (maior)</option>
+                  <option value="Ano (mais novo)">Ordenar por: Ano (mais novo)</option>
+                  <option value="Km (menor)">Ordenar por: Km (menor)</option>
+                </select>
+              </div>
             </div>
 
-            {filteredCars.length > 0 ? (
+            {sortedAndFilteredCars.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredCars.map(car => (
+                {sortedAndFilteredCars.map(car => (
                   <div key={car.id} className="relative">
                     <CarCard {...car} />
                     {isAdmin && (
