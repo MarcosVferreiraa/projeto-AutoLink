@@ -1,0 +1,75 @@
+/* Container de Alinhamento Centralizado */
+.notfound-container {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Bloco de Conteúdo Interno */
+.notfound-content {
+  text-align: center;
+}
+
+/* Área do Ícone de Lupa */
+.notfound-icon-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.notfound-icon {
+  width: 6rem; /* w-24 */
+  height: 6rem; /* h-24 */
+  margin-left: auto;
+  margin-right: auto;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Código do Erro (404) */
+.notfound-content h1 {
+  font-size: 3.75rem; /* text-6xl */
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+  line-height: 1;
+}
+
+/* Subtítulo do Erro */
+.notfound-content h2 {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: hsl(var(--foreground));
+}
+
+/* Texto Auxiliar Descritivo */
+.notfound-description {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 2rem;
+  max-width: 28rem; /* max-w-md */
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Botão de Retorno à Home */
+.btn-back-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-back-home:hover {
+  opacity: 0.9;
+}

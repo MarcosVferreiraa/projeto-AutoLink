@@ -1,0 +1,137 @@
+/* Container Principal */
+.favorites-container {
+  max-width: 80rem; /* max-w-7xl (1280px) */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 3rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .favorites-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .favorites-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Cabeçalho da Página */
+.favorites-header-section {
+  margin-bottom: 2rem;
+}
+
+.favorites-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.favorites-title-wrapper h1 {
+  font-size: 1.875rem; /* text-3xl ou similar */
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.favorites-header-section p {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Grid de Listagem dos Carros Favoritos */
+.favorites-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .favorites-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .favorites-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Wrapper individual do Card para posicionar o botão X absoluto */
+.favorite-card-wrapper {
+  position: relative;
+}
+
+/* Botão Flutuante de Remover (X) */
+.btn-remove-favorite {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 2rem;
+  height: 2rem;
+  background-color: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border: none;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.2s;
+}
+
+.btn-remove-favorite:hover {
+  opacity: 0.9;
+}
+
+/* Estado Vazio (Quando não há favoritos) */
+.favorites-empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
+
+.favorites-empty-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.favorites-empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.favorites-empty-state p {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+/* Botão para voltar ao estoque */
+.btn-go-stock {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.btn-go-stock:hover {
+  opacity: 0.9;
+}

@@ -1,5 +1,6 @@
-import { Calculator, TrendingUp } from 'lucide-react';
+import { Calculator } from 'lucide-react';
 import { useState } from 'react';
+import './FinanceSimulator.css';
 
 export function FinanceSimulator() {
   const [carPrice, setCarPrice] = useState('150000');
@@ -12,144 +13,77 @@ export function FinanceSimulator() {
     const down = Number(downPayment);
     const term = Number(months);
     const rate = interestRate / 100;
-
     const financed = price - down;
-    const monthlyRate = rate;
-    const payment = (financed * monthlyRate * Math.pow(1 + monthlyRate, term)) / (Math.pow(1 + monthlyRate, term) - 1);
+    const payment = financed > 0 
+      ? (financed * rate * Math.pow(1 + rate, term)) / (Math.pow(1 + rate, term) - 1) 
+      : 0;
 
     return {
-      monthlyPayment: payment,
-      totalAmount: payment * term + down,
-      totalInterest: (payment * term + down) - price,
-      financedAmount: financed
+      monthlyPayment: payment > 0 ? payment : 0,
+      totalAmount: payment > 0 ? (payment * term + down) : price,
+      totalInterest: payment > 0 ? ((payment * term + down) - price) : 0,
+      financedAmount: financed > 0 ? financed : 0
     };
   };
 
   const result = calculateMonthlyPayment();
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+    <div className="simulator-container">
+      <div className="simulator-header">
+        <div className="simulator-title-row">
           <Calculator className="w-8 h-8 text-primary" />
           <h1>Simulador de Financiamento</h1>
         </div>
-        <p className="text-muted-foreground">
-          Simule o financiamento do seu veículo e veja as melhores condições
-        </p>
+        <p>Calcule o valor aproximado das parcelas para o seu próximo veículo</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Form */}
-        <div className="bg-card rounded-lg border border-border p-6">
-          <h3 className="mb-6">Dados do Financiamento</h3>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-2">Valor do Veículo</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-                <input
-                  type="number"
-                  value={carPrice}
-                  onChange={(e) => setCarPrice(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-2">Entrada</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-                <input
-                  type="number"
-                  value={downPayment}
-                  onChange={(e) => setDownPayment(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                {((Number(downPayment) / Number(carPrice)) * 100).toFixed(1)}% do valor do veículo
-              </p>
-            </div>
-
-            <div>
-              <label className="block mb-2">Prazo (meses)</label>
-              <select
-                value={months}
-                onChange={(e) => setMonths(e.target.value)}
-                className="w-full px-4 py-2 bg-input-background rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="12">12 meses</option>
-                <option value="24">24 meses</option>
-                <option value="36">36 meses</option>
-                <option value="48">48 meses</option>
-                <option value="60">60 meses</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-2">Taxa de Juros (ao mês)</label>
-              <input
-                type="text"
-                value={`${interestRate}%`}
-                disabled
-                className="w-full px-4 py-2 bg-muted rounded-md border border-border text-muted-foreground"
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Taxa promocional autoLink
-              </p>
-            </div>
+      <div className="simulator-layout">
+        {/* COLUNA ESQUERDA: INPUTS */}
+        <div className="simulator-card">
+          <div className="form-group">
+            <label>Valor do Veículo (R$)</label>
+            <input type="number" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Valor de Entrada (R$)</label>
+            <input type="number" value={downPayment} onChange={(e) => setDownPayment(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Prazo de Pagamento</label>
+            <select value={months} onChange={(e) => setMonths(e.target.value)}>
+              <option value="12">12 meses</option>
+              <option value="24">24 meses</option>
+              <option value="36">36 meses</option>
+              <option value="48">48 meses</option>
+              <option value="60">60 meses</option>
+            </select>
+          </div>
+          <div className="interest-rate-info">
+            Taxa de juros: <strong>{interestRate}% ao mês</strong>.
           </div>
         </div>
 
-        {/* Results */}
-        <div className="space-y-4">
-          <div className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-5 h-5" />
-              <h3>Parcela Mensal</h3>
-            </div>
-            <p className="text-4xl mb-1">
-              R$ {result.monthlyPayment.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-primary-foreground/80">
-              em {months} vezes
-            </p>
+        {/* COLUNA DIREITA: RESULTADOS */}
+        <div className="simulator-results-column">
+          <div className="simulator-card results-display-card">
+            <p className="payment-label">Parcela Mensal Estimada</p>
+            <h2 className="payment-value">R$ {result.monthlyPayment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+            <p className="payment-term">em {months}x fixas</p>
           </div>
 
-          <div className="bg-card rounded-lg border border-border p-6">
-            <h4 className="mb-4">Resumo do Financiamento</h4>
-            <div className="space-y-3">
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Valor do Veículo</span>
-                <span>R$ {Number(carPrice).toLocaleString('pt-BR')}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Entrada</span>
-                <span>R$ {Number(downPayment).toLocaleString('pt-BR')}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Valor Financiado</span>
-                <span>R$ {result.financedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Total de Juros</span>
-                <span>R$ {result.totalInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between py-2">
-                <span>Total a Pagar</span>
-                <span className="text-primary">
-                  R$ {result.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
-              </div>
+          <div className="simulator-card details-breakdown-card">
+            <h3>Resumo da Simulação</h3>
+            <div className="breakdown-list">
+              <div className="breakdown-row"><span className="label-text">Preço do Carro</span><span>R$ {Number(carPrice).toLocaleString('pt-BR')}</span></div>
+              <div className="breakdown-row"><span className="label-text">Entrada</span><span>R$ {Number(downPayment).toLocaleString('pt-BR')}</span></div>
+              <div className="breakdown-row"><span className="label-text">Valor Financiado</span><span>R$ {result.financedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="breakdown-row"><span className="label-text">Total de Juros</span><span>R$ {result.totalInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="breakdown-row total-row"><span className="label-text">Total a Pagar</span><span className="value-text">R$ {result.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
             </div>
           </div>
 
-          <button className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity">
-            Solicitar Financiamento
-          </button>
+          <button className="btn-request-finance">Solicitar Financiamento</button>
         </div>
       </div>
     </div>
