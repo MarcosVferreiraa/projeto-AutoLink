@@ -1,0 +1,31 @@
+.simulator-container { max-width: 1000px; margin: 0 auto; padding: 4rem 2rem; }
+.simulator-header { margin-bottom: 3rem; text-align: center; }
+.simulator-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+/* Cartão Unificado */
+.simulator-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.simulator-results-column { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* Inputs */
+.form-group { margin-bottom: 1.5rem; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #374151; }
+.form-group input, .form-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; background: #f9fafb; }
+
+/* Resultados */
+.results-display-card { text-align: center; }
+.payment-label { color: #6b7280; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 0.05em; }
+.payment-value { font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0; color: #111827; }
+
+/* Resumo */
+.breakdown-list { display: flex; flex-direction: column; gap: 1rem; }
+.breakdown-row { display: flex; justify-content: space-between; padding-bottom: 0.75rem; border-bottom: 1px solid #f3f4f6; }
+.total-row { border-top: 2px solid #e5e7eb; padding-top: 1rem; border-bottom: none; font-weight: 700; color: #111827; }
+
+.btn-request-finance { width: 100%; padding: 1rem; background: #111827; color: white; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }

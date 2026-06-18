@@ -3,17 +3,19 @@ import { useNavigate } from 'react-router';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CarCard } from '../components/CarCard';
 import { AddCarModal } from '../components/AddCarModal';
+import { LoginModal } from '../components/LoginModal';
 import { useCars } from '../context/CarContext'
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
-import "./home.css"; 
+import "./Home.css"; 
 
 export function Home() {
   const navigate = useNavigate();
   const { cars, addCar, removeCar } = useCars();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Estado para controlar o modal de login
   
   // Estado para os filtros da Sidebar lateral esquerda
   const [filters, setFilters] = useState({
@@ -30,7 +32,30 @@ export function Home() {
   // ESTADO DO FILTRO DA DIREITA: Guarda o critério de ordenação selecionado
   const [sortCriterion, setSortCriterion] = useState('');
 
-  // 1. Primeiro aplicamos os filtros da Sidebar esquerda
+  // Função para abrir o modal com verificação de segurança
+  const handleOpenAddModal = () => {
+    if (!user) {
+      alert("Você precisa estar logado para anunciar um veículo!");
+      setIsLoginModalOpen(true); //  Abre o modal de login diretamente em vez de redirecionar
+    } else {
+      setIsAddCarModalOpen(true); 
+    }
+  };
+
+  // Função para injetar o ID do proprietário do veículo antes de salvar
+  const handleAddCarWithUser = async (newCarData) => {
+    try {
+      const carWithAuthor = {
+        ...newCarData,
+        userId: user.uid || user.id 
+      };
+      await addCar(carWithAuthor);
+    } catch (error) {
+      console.error("Erro ao adicionar veículo:", error);
+    }
+  };
+
+  // filtros da Sidebar esquerda
   const filteredCars = cars.filter(car => {
     const matchesSearch = filters.search === '' ||
       (car.brand && car.brand.toLowerCase().includes(filters.search.toLowerCase())) ||
@@ -51,7 +76,7 @@ export function Home() {
            matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
   });
 
-  // 2. Agora aplicamos a ordenação do filtro da direita nos carros filtrados
+  // ordenação do filtro da direita nos carros filtrados
   const sortedAndFilteredCars = [...filteredCars].sort((a, b) => {
     if (sortCriterion === 'Preço (menor)') {
       return Number(a.price) - Number(b.price);
@@ -63,23 +88,29 @@ export function Home() {
       return Number(b.year) - Number(a.year);
     }
     if (sortCriterion === 'Km (menor)') {
-      // Como o banco usa 'mileage', ordenamos por ela
       return Number(a.mileage) - Number(b.mileage);
     }
-    return 0; // Sem ordenação (padrão)
+    return 0; 
   });
 
   return (
     <>
+      {/* Modal de Criação de Carros */}
       <AddCarModal
         isOpen={isAddCarModalOpen}
         onClose={() => setIsAddCarModalOpen(false)}
-        onAddCar={addCar}
+        onAddCar={handleAddCarWithUser}
+      />
+
+      {/* 4. Modal de Login inserido na árvore de renderização */}
+      <LoginModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
 
       {/* Botão Flutuante */}
       <button
-        onClick={() => setIsAddCarModalOpen(true)}
+        onClick={handleOpenAddModal}
         className="floating-add-btn"
         aria-label="Adicionar carro"
       >
@@ -130,7 +161,6 @@ export function Home() {
                 </p>
               </div>
 
-              {/* O FILTRO DA DIREITA QUE TINHA SUMIDO DE VOLTA AQUI: */}
               <div className="flex items-center gap-2">
                 <select 
                   className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"

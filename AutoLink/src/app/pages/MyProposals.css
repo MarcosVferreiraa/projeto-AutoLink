@@ -1,0 +1,295 @@
+/* Container Geral */
+.proposals-container {
+  max-width: 64rem; /* max-w-4xl (1024px) */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 3rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .proposals-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .proposals-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Cabeçalho da Página */
+.proposals-header {
+  margin-bottom: 2rem;
+}
+
+.proposals-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.proposals-title-row h1 {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.proposals-header p {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Lista de Cards de Propostas */
+.proposals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* space-y-6 */
+}
+
+/* Card Individual de Proposta */
+.proposal-card {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Corpo Interno do Card (Grid Responsivo Layout de Imagem + Dados) */
+.proposal-card-body {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .proposal-card-body {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+/* Miniatura da Imagem do Carro */
+.proposal-car-thumb {
+  width: 100%;
+  height: 8rem; /* h-32 */
+  object-fit: cover;
+  border-radius: 0.375rem;
+}
+
+@media (min-width: 640px) {
+  .proposal-car-thumb {
+    width: 12rem; /* w-48 */
+  }
+}
+
+/* Bloco de Informações da Proposta */
+.proposal-main-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Linha Superior: Nome do Carro + Badge de Estado */
+.proposal-details-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .proposal-details-header {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.proposal-details-header h3 {
+  font-size: 1.25rem; /* text-xl */
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* Badges de Estado das Propostas (Aguardando, Aprovada, Recusada) */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-status.pending {
+  background-color: #fef9c3; /* yellow-100 */
+  color: #854d0e; /* yellow-800 */
+}
+
+.badge-status.approved {
+  background-color: #dcfce7; /* green-100 */
+  color: #166534; /* green-800 */
+}
+
+.badge-status.rejected {
+  background-color: #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+}
+
+/* Grid de Valores (Preço Original vs Proposta) */
+.proposal-prices-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+
+.price-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-item .label-text {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.125rem;
+}
+
+.price-item .value-text {
+  font-weight: 500;
+}
+
+.price-item .value-text.proposed {
+  color: hsl(var(--primary));
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* Mensagem Opcional do Cliente */
+.proposal-message-box {
+  background-color: hsl(var(--muted) / 0.5);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.proposal-message-box .label-text {
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.25rem;
+}
+
+.proposal-message-box p {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+/* Zona do Rodapé do Card (Ações) */
+.proposal-card-footer {
+  background-color: hsl(var(--muted) / 0.3);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Botões de Ação */
+.btn-view-car {
+  padding: 0.5rem 1rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.btn-view-car:hover {
+  opacity: 0.9;
+}
+
+.btn-cancel-proposal {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 1px solid hsl(var(--destructive));
+  color: hsl(var(--destructive));
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel-proposal:hover {
+  background-color: rgba(239, 68, 68, 0.1); /* destructive/10 */
+}
+
+/* Estado Vazio (Sem propostas) */
+.proposals-empty-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+}
+
+.proposals-empty-icon {
+  width: 3rem;
+  height: 3rem;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.proposals-empty-state h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
+}
+
+.proposals-empty-state p {
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+.btn-go-stock {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.btn-go-stock:hover {
+  opacity: 0.9;
+}
+
+/* Estado Não Autenticado (Aviso de Login) */
+.proposals-login-state {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.btn-login-redirect {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 0.375rem;
+  text-decoration: none;
+}
