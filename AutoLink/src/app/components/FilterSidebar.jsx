@@ -30,7 +30,7 @@ export function FilterSidebar({ onFilterChange }) {
               name="search"
               placeholder="Marca ou modelo..."
               onChange={handleChange}
-              className="filter-sidebar-input"
+              className="filter-sidebar-input filter-sidebar-search-input"
             />
           </div>
         </div>

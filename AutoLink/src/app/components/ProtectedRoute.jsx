@@ -16,3 +16,21 @@ export function ProtectedRoute({ children }) {
 
   return children;
 }
+
+export function AdminRoute({ children }) {
+  const { user, isAdmin, loading } = useAuth();
+
+  if (loading) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>A carregar sessão...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}

@@ -5,7 +5,9 @@ import { useProposals } from '../context/ProposalsContext';
 import './MyProposals.css';
 export function MyProposals() {
   const { user } = useAuth();
-  const { getUserProposals, cancelProposal } = useProposals();
+  const proposalsContext = useProposals();
+  const getUserProposals = proposalsContext?.getUserProposals || (() => []);
+  const cancelProposal = proposalsContext?.cancelProposal || (async () => {});
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -47,7 +49,7 @@ export function MyProposals() {
     );
   }
 
-  const myProposals = getUserProposals(user.id);
+  const myProposals = getUserProposals(user.uid || user.id);
 
   return (
     <div className="proposals-container">

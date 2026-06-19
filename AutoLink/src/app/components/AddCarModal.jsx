@@ -83,7 +83,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                   onChange={handleChange}
                   placeholder="https://exemplo.com/imagem.jpg"
                   required
-                  className={styles.addCarModalInput}
+                  className={`${styles.addCarModalInput} ${styles.addCarModalImageInput}`}
                 />
               </div>
             </div>

@@ -11,6 +11,7 @@ import { NotFound } from './pages/NotFound';
 import { AdminProposals } from './pages/AdminProposals';
 import { AdminUsers } from './pages/AdminUsers'; 
 import { EditCar } from './pages/EditCar';  
+import { ProtectedRoute, AdminRoute } from './components/ProtectedRoute';
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -18,14 +19,15 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Home },
       { path: 'carro/:id', Component: CarDetails },
-      { path: 'carro/:id/editar', Component: EditCar },
-      { path: 'favoritos', Component: Favorites },
-      { path: 'propostas', Component: MyProposals },
+      { path: 'carro/:id/editar', element: <ProtectedRoute><EditCar /></ProtectedRoute> },
+      { path: 'favoritos', element: <ProtectedRoute><Favorites /></ProtectedRoute> },
+      { path: 'propostas', element: <ProtectedRoute><MyProposals /></ProtectedRoute> },
       { path: 'financiamento', Component: FinanceSimulator },
+      { path: 'login', Component: Home },
       { path: 'sobre', Component: About },
       { path: 'contato', Component: Contact },
-      { path: 'admin/propostas', Component: AdminProposals },
-      { path: 'admin/usuarios', Component: AdminUsers }, 
+      { path: 'admin/propostas', element: <AdminRoute><AdminProposals /></AdminRoute> },
+      { path: 'admin/usuarios', element: <AdminRoute><AdminUsers /></AdminRoute> }, 
       { path: '*', Component: NotFound }
     ]
   }

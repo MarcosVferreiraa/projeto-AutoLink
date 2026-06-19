@@ -34,6 +34,26 @@
   gap: 1.25rem; /* Espaçamento vertical uniforme entre os inputs do MUI */
 }
 
+/* Campos MUI (TextField e Select) com borda mais visível */
+.register-form-layout .MuiOutlinedInput-notchedOutline {
+  border-width: 2px !important;
+  border-color: #4b5563 !important;
+}
+
+.register-form-layout .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #374151 !important;
+}
+
+.register-form-layout .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #111827 !important;
+  border-width: 2px !important;
+}
+
+.register-form-layout .MuiOutlinedInput-root.Mui-focused {
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.12);
+  border-radius: 0.5rem;
+}
+
 /* Ajuste específico para o Alerta do MUI */
 .register-alert {
   margin-bottom: 0.5rem;

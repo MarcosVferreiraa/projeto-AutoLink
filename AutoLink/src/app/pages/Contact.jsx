@@ -1,5 +1,6 @@
 ﻿import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { useState } from 'react';
+import { formatPhoneByThreeDigits } from '../utils/phone';
 import './Contact.css';
 
 export function Contact() {
@@ -38,7 +39,7 @@ export function Contact() {
             <div className="info-icon-wrapper"><Phone className="w-5 h-5" /></div>
             <div className="info-content">
               <h3>Telefone</h3>
-              <p>(11) 98765-4321</p>
+              <p>{formatPhoneByThreeDigits('910214376')}</p>
             </div>
           </div>
           <div className="info-card">

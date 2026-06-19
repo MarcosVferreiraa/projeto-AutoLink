@@ -39,6 +39,10 @@
   transition: box-shadow 0.2s ease;
 }
 
+.filter-sidebar-search-input {
+  padding-left: 2.5rem;
+}
+
 .filter-sidebar-input:focus,
 .filter-sidebar-select:focus {
   box-shadow: 0 0 0 2px var(--color-ring);

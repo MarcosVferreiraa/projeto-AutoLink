@@ -61,6 +61,8 @@
 /* Outros estilos */
 .profile-modal-content {
   padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
 }
 
 .profile-modal-banner {
@@ -97,6 +99,72 @@
   border: 1px solid #e5e7eb;
 }
 
+.profile-modal-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.profile-modal-section-title {
+  margin: 0 0 0.9rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.profile-modal-edit-form {
+  display: grid;
+  gap: 0.55rem;
+  width: 100%;
+}
+
+.profile-modal-edit-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.profile-modal-edit-form input {
+  border: 1.5px solid #d1d5db;
+  border-radius: 0.65rem;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  background: #ffffff;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-modal-edit-form input:focus {
+  outline: none;
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+}
+
+.profile-modal-edit-feedback {
+  margin: 0.2rem 0;
+  font-size: 0.86rem;
+  color: #334155;
+}
+
+.profile-modal-edit-submit {
+  margin-top: 0.35rem;
+  border: 1.5px solid #111827;
+  border-radius: 0.7rem;
+  background: #111827;
+  color: #ffffff;
+  height: 2.55rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+.profile-modal-edit-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .profile-modal-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -120,6 +188,7 @@
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  padding-top: 0.25rem;
 }
 
 .profile-modal-link-item {

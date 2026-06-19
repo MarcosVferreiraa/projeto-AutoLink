@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import {
-  Car,
   Phone,
   Mail,
   User,
@@ -9,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
+import { formatPhoneByThreeDigits } from "../utils/phone";
 
 import "./Header.css";
 
@@ -39,7 +39,7 @@ export function Header({
             className="header-brand"
           >
             <div className="header-logo">
-              <Car className="w-6 h-6 text-primary-foreground" />
+              <img src="/favicon.svg" alt="AutoLink" className="header-logo-image" />
             </div>
 
             <div className="header-title">
@@ -109,7 +109,7 @@ export function Header({
 
               <div className="header-contact-item">
                 <Phone className="w-4 h-4 text-muted-foreground" />
-                <span>(11) 98765-4321</span>
+                <span>{formatPhoneByThreeDigits("910214376")}</span>
               </div>
 
               <div className="header-contact-item">
