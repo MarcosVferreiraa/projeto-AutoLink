@@ -75,7 +75,7 @@ export function MyProposals() {
                 <div className="proposal-main-details">
                   <div className="proposal-details-header">
                     <h3>
-                      {proposal.carBrand} {proposal.carModel} ({proposal.carYear})
+                      {proposal.carBrand} {proposal.carModel}{proposal.carYear ? ` (${proposal.carYear})` : ''}
                     </h3>
                     {getStatusBadge(proposal.status)}
                   </div>
