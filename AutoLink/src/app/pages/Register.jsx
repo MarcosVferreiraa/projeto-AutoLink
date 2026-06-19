@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import Alert from '@mui/material/Alert';
 
-import { auth, db } from '../firebase/firebase';
+import { auth, db } from '../../firebase/firebase';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
