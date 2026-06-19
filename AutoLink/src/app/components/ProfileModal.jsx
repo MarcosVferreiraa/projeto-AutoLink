@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useEffect, useState } from "react";
 import {
   X,
   User,
@@ -13,6 +14,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { useProposals } from "../context/ProposalsContext";
+import { formatPhoneByThreeDigits } from "../utils/phone";
 
 import "./ProfileModal.css";
 
@@ -23,18 +25,49 @@ export function ProfileModal({
   const {
     user,
     userProfile,
+    updateProfile,
+    changePassword,
+    canChangePassword,
     logout,
     isAdmin,
   } = useAuth();
 
+  const [profileName, setProfileName] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileSaveMessage, setProfileSaveMessage] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordSaveMessage, setPasswordSaveMessage] = useState("");
+
   const { favoriteIds } = useFavorites();
-  const { getUserProposals } =
+  const proposalsContext =
     useProposals();
+  const getUserProposals =
+    proposalsContext?.getUserProposals;
+
+  useEffect(() => {
+    if (!isOpen || !user) return;
+
+    setProfileName(userProfile?.name || user?.displayName || "");
+    setProfilePhone(
+      formatPhoneByThreeDigits(
+        userProfile?.phone || userProfile?.phoneNumber || ""
+      )
+    );
+    setProfileSaveMessage("");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setPasswordSaveMessage("");
+  }, [isOpen, userProfile, user]);
 
   if (!isOpen || !user) return null;
 
   const userProposals =
-    getUserProposals?.(user.uid) || [];
+    getUserProposals?.(user.uid || user.id) || [];
 
   const handleLogout = async () => {
   try {
@@ -44,6 +77,66 @@ export function ProfileModal({
     console.error(error);
   }
 };
+
+  const handleSaveProfile = async (event) => {
+    event.preventDefault();
+
+    if (!profileName.trim()) {
+      setProfileSaveMessage("Informe um nome válido.");
+      return;
+    }
+
+    try {
+      setIsSavingProfile(true);
+      setProfileSaveMessage("");
+
+      await updateProfile({
+        name: profileName,
+        phone: formatPhoneByThreeDigits(profilePhone),
+      });
+
+      setProfileSaveMessage("Perfil atualizado com sucesso.");
+    } catch (error) {
+      console.error(error);
+      setProfileSaveMessage("Não foi possível atualizar o perfil agora.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async (event) => {
+    event.preventDefault();
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordSaveMessage("Preencha todos os campos de senha.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordSaveMessage("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordSaveMessage("A confirmação da senha não coincide.");
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      setPasswordSaveMessage("");
+      await changePassword(currentPassword, newPassword);
+      setPasswordSaveMessage("Senha atualizada com sucesso.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error(error);
+      setPasswordSaveMessage(error?.message || "Não foi possível alterar a senha agora.");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   const displayName =
     userProfile?.name ||
@@ -120,13 +213,104 @@ export function ProfileModal({
                   </p>
 
                   <p>
-                    {userProfile?.phone ||
+                    {formatPhoneByThreeDigits(userProfile?.phone || userProfile?.phoneNumber || "") ||
                       "Não informado"}
                   </p>
                 </div>
               </div>
 
             </div>
+          </div>
+
+          <div className="profile-modal-section">
+            <h3 className="profile-modal-section-title">
+              Editar Perfil
+            </h3>
+
+            <form className="profile-modal-edit-form" onSubmit={handleSaveProfile}>
+              <label htmlFor="profile-name">Nome</label>
+              <input
+                id="profile-name"
+                type="text"
+                value={profileName}
+                onChange={(event) => setProfileName(event.target.value)}
+                placeholder="Seu nome"
+                required
+              />
+
+              <label htmlFor="profile-phone">Telefone</label>
+              <input
+                id="profile-phone"
+                type="text"
+                value={profilePhone}
+                onChange={(event) => setProfilePhone(formatPhoneByThreeDigits(event.target.value))}
+                placeholder="912 345 678"
+              />
+
+              {profileSaveMessage && (
+                <p className="profile-modal-edit-feedback">
+                  {profileSaveMessage}
+                </p>
+              )}
+
+              <button type="submit" className="profile-modal-edit-submit" disabled={isSavingProfile}>
+                {isSavingProfile ? "A guardar..." : "Guardar Perfil"}
+              </button>
+            </form>
+          </div>
+
+          <div className="profile-modal-section">
+            <h3 className="profile-modal-section-title">
+              Alterar Senha
+            </h3>
+
+            {canChangePassword ? (
+              <form className="profile-modal-edit-form" onSubmit={handleChangePassword}>
+                <label htmlFor="profile-current-password">Senha atual</label>
+                <input
+                  id="profile-current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  placeholder="Digite a senha atual"
+                  required
+                />
+
+                <label htmlFor="profile-new-password">Nova senha</label>
+                <input
+                  id="profile-new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  required
+                />
+
+                <label htmlFor="profile-confirm-password">Confirmar nova senha</label>
+                <input
+                  id="profile-confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  placeholder="Repita a nova senha"
+                  required
+                />
+
+                {passwordSaveMessage && (
+                  <p className="profile-modal-edit-feedback">
+                    {passwordSaveMessage}
+                  </p>
+                )}
+
+                <button type="submit" className="profile-modal-edit-submit" disabled={isChangingPassword}>
+                  {isChangingPassword ? "A atualizar..." : "Atualizar Senha"}
+                </button>
+              </form>
+            ) : (
+              <p className="profile-modal-edit-feedback">
+                Alteração de senha disponível apenas para contas com login por e-mail e senha.
+              </p>
+            )}
           </div>
 
           {!isAdmin && (

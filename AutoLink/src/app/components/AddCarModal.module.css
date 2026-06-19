@@ -87,6 +87,10 @@
   font-size: 1rem;
 }
 
+.addCarModalImageInput {
+  padding-left: 2.6rem;
+}
+
 .addCarModalInput:focus,
 .addCarModalSelect:focus,
 .addCarModalTextarea:focus {

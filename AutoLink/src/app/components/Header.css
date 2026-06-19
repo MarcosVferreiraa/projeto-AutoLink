@@ -44,6 +44,12 @@
   justify-content: center;
 }
 
+.header-logo-image {
+  width: 1.7rem;
+  height: 1.7rem;
+  display: block;
+}
+
 .header-title h1 {
   font-size: 1.25rem;
   margin: 0;

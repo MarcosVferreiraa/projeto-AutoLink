@@ -9,6 +9,7 @@ import { auth, db } from '../firebase/firebase';
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import { formatPhoneByThreeDigits } from '../utils/phone';
 import './Register.css';
 
 export default function Register() {
@@ -52,7 +53,7 @@ export default function Register() {
       uid: cred.user.uid,
       email,
       name,
-      phoneNumber,
+      phoneNumber: formatPhoneByThreeDigits(phoneNumber),
       userType
     });
     return cred;

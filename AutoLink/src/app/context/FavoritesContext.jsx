@@ -20,6 +20,20 @@ import { useAuth } from "./AuthContext";
 
 const FavoritesContext = createContext();
 
+const favoritesContextFallback = {
+  favoriteIds: [],
+  isFavorite: () => false,
+  addFavorite: async () => {
+    throw new Error("FavoritesProvider não disponível.");
+  },
+  removeFavorite: async () => {
+    throw new Error("FavoritesProvider não disponível.");
+  },
+  toggleFavorite: async () => {
+    throw new Error("FavoritesProvider não disponível.");
+  }
+};
+
 export function FavoritesProvider({ children }) {
   const { user } = useAuth();
 
@@ -59,6 +73,7 @@ export function FavoritesProvider({ children }) {
       setFavoriteDocs(docsMap);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 
@@ -81,6 +96,7 @@ export function FavoritesProvider({ children }) {
       }));
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 
@@ -105,6 +121,7 @@ export function FavoritesProvider({ children }) {
       });
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 
@@ -143,11 +160,5 @@ export function FavoritesProvider({ children }) {
 export function useFavorites() {
   const context = useContext(FavoritesContext);
 
-  if (!context) {
-    throw new Error(
-      "useFavorites deve ser usado dentro de FavoritesProvider"
-    );
-  }
-
-  return context;
+  return context || favoritesContextFallback;
 }

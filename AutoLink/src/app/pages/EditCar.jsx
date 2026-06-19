@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useCars } from '../context/CarContext';
 import './EditCar.css';
+
+const MARCAS_PREDEFINIDAS = [
+  "Toyota", "Volkswagen", "Ford", "Chevrolet", "Honda", 
+  "Hyundai", "Fiat", "Jeep", "Nissan", "Renault", "BMW", "Mercedes-Benz"
+];
+
 export function EditCar() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { getCarById, updateCar, loading } = useCars();
+  // Agora 'updateCar' vem corretamente do contexto
+  const { getCarById, updateCar } = useCars();
 
   const [formData, setFormData] = useState({
-    brand: '',
-    model: '',
-    year: '',
-    price: '',
-    mileage: '',
-    fuel: '',
-    transmission: '',
-    color: '',
-    image: '',
-    description: ''
+    brand: '', model: '', year: '', price: '', mileage: '',
+    fuel: '', transmission: '', color: '', image: '',
+    description: '', features: ''
   });
 
   useEffect(() => {
@@ -33,7 +33,8 @@ export function EditCar() {
         transmission: car.transmission || '',
         color: car.color || '',
         image: car.image || '',
-        description: car.description || ''
+        description: car.description || '',
+        features: Array.isArray(car.features) ? car.features.join(', ') : (car.features || '')
       });
     }
   }, [id, getCarById]);
@@ -45,42 +46,37 @@ export function EditCar() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Garante que campos numéricos críticos sejam salvos corretamente no banco
-      const updatedData = {
-        ...formData,
-        year: Number(formData.year),
-        price: Number(formData.price),
-        mileage: Number(formData.mileage)
-      };
+    
+    // Converte de volta para Array antes de enviar
+    const featuresArray = formData.features
+      ? formData.features.split(',').map(f => f.trim()).filter(f => f.length > 0)
+      : [];
 
-      await updateCar(id, updatedData);
-      alert("Veículo atualizado com sucesso!");
-      navigate(`/carro/${id}`);
+    try {
+      await updateCar(id, { ...formData, features: featuresArray });
+      navigate(-1);
     } catch (error) {
-      console.error("Erro ao atualizar o carro:", error);
-      alert("Erro ao salvar as alterações.");
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar alterações.");
     }
   };
 
-  if (loading) {
-    return <div className="edit-car-loading">Carregando dados do veículo...</div>;
-  }
-
   return (
     <div className="edit-car-container">
-      <h1>Editar Cadastro do Veículo</h1>
-
+      <h1>Editar Veículo</h1>
       <form onSubmit={handleSubmit} className="edit-car-form">
-        <div className="form-grid-2cols">
-          <div className="form-field-group">
-            <label>Marca</label>
-            <input type="text" name="brand" value={formData.brand} onChange={handleChange} required />
-          </div>
-          <div className="form-field-group">
-            <label>Modelo</label>
-            <input type="text" name="model" value={formData.model} onChange={handleChange} required />
-          </div>
+        <div className="form-field-group">
+          <label>Marca</label>
+          <select name="brand" value={formData.brand} onChange={handleChange} required>
+            <option value="">Selecione uma marca</option>
+            {MARCAS_PREDEFINIDAS.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </div>
+        
+        {/* Campos mantidos exatamente conforme a sua estrutura original */}
+        <div className="form-field-group">
+          <label>Modelo</label>
+          <input type="text" name="model" value={formData.model} onChange={handleChange} required />
         </div>
 
         <div className="form-grid-2cols">
@@ -89,20 +85,14 @@ export function EditCar() {
             <input type="number" name="year" value={formData.year} onChange={handleChange} required />
           </div>
           <div className="form-field-group">
-            <label>Preço (R$)</label>
+            <label>Preço</label>
             <input type="number" name="price" value={formData.price} onChange={handleChange} required />
           </div>
         </div>
 
-        <div className="form-grid-2cols">
-          <div className="form-field-group">
-            <label>Quilometragem (km)</label>
-            <input type="number" name="mileage" value={formData.mileage} onChange={handleChange} required />
-          </div>
-          <div className="form-field-group">
-            <label>Cor</label>
-            <input type="text" name="color" value={formData.color} onChange={handleChange} required />
-          </div>
+        <div className="form-field-group">
+          <label>Quilometragem</label>
+          <input type="number" name="mileage" value={formData.mileage} onChange={handleChange} required />
         </div>
 
         <div className="form-grid-2cols">
@@ -117,22 +107,28 @@ export function EditCar() {
         </div>
 
         <div className="form-field-group">
+          <label>Cor</label>
+          <input type="text" name="color" value={formData.color} onChange={handleChange} required />
+        </div>
+
+        <div className="form-field-group">
           <label>URL da Imagem</label>
           <input type="text" name="image" value={formData.image} onChange={handleChange} required />
         </div>
 
         <div className="form-field-group">
-          <label>Descrição do Veículo</label>
+          <label>Descrição</label>
           <textarea name="description" value={formData.description} onChange={handleChange} />
         </div>
 
+        <div className="form-field-group">
+          <label>Equipamentos (separados por vírgula)</label>
+          <textarea name="features" value={formData.features} onChange={handleChange} />
+        </div>
+
         <div className="form-actions-zone">
-          <button type="submit" className="btn-save-car">
-            Salvar Alterações
-          </button>
-          <button type="button" onClick={() => navigate(-1)} className="btn-cancel-edit">
-            Cancelar
-          </button>
+          <button type="submit" className="btn-save-car">Salvar Alterações</button>
+          <button type="button" onClick={() => navigate(-1)} className="btn-cancel-edit">Cancelar</button>
         </div>
       </form>
     </div>

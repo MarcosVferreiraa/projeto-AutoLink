@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -10,15 +11,20 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
 } from "firebase/auth";
 
 import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 import { auth, db } from "../../firebase/firebase";
+import { formatPhoneByThreeDigits } from "../utils/phone";
 
 const AuthContext = createContext(undefined);
 
@@ -27,22 +33,18 @@ const SESSION_DURATION = 60 * 60 * 1000; // 60 min
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const mockAdminSessionRef = useRef(false);
 
-  const [sessionExpired, setSessionExpired] =
-    useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [countdown, setCountdown] = useState(3);
 
-  const [countdown, setCountdown] =
-    useState(3);
+  const providerIds = user?.providerData?.map((provider) => provider?.providerId) || [];
 
-  // =========================
-  // LOGIN
-  // =========================
+  const canChangePassword = !mockAdminSessionRef.current && providerIds.includes("password");
+
   async function login(email, password) {
-    // ADMIN FIXO PARA DESENVOLVIMENTO
-    if (
-      email === "admin@stand.com" &&
-      password === "123456"
-    ) {
+    if (email === "admin@stand.com" && password === "123456") {
       const mockAdminUser = {
         uid: "admin-fixo-desenvolvimento-123",
       };
@@ -50,125 +52,125 @@ export function AuthProvider({ children }) {
       const mockAdminProfile = {
         name: "Administrador Geral",
         email: "admin@stand.com",
-        phone: "912345678",
+        phone: "912 345 678",
         role: "admin",
         approved: true,
       };
 
       setUser(mockAdminUser);
       setUserProfile(mockAdminProfile);
+      mockAdminSessionRef.current = true;
+      setLoading(false);
 
-      return {
-        user: mockAdminUser,
-      };
+      return { user: mockAdminUser };
     }
 
-    return await signInWithEmailAndPassword(
+    return await signInWithEmailAndPassword(auth, email, password);
+  }
+
+  async function register(name, email, password, phone, role = "user") {
+    const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
       password
     );
-  }
 
-  // =========================
-  // REGISTRO
-  // =========================
-  async function register(
-    name,
-    email,
-    password,
-    phone,
-    role = "user"
-  ) {
-    const userCredential =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-    await setDoc(
-      doc(
-        db,
-        "users",
-        userCredential.user.uid
-      ),
-      {
-        uid: userCredential.user.uid,
-        name,
-        email,
-        phone,
-        role,
-        approved: false,
-        createdAt: new Date(),
-      }
-    );
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      uid: userCredential.user.uid,
+      name,
+      email,
+      phone: formatPhoneByThreeDigits(phone),
+      role,
+      approved: false,
+      createdAt: new Date(),
+    });
 
     return userCredential;
   }
 
-  // =========================
-  // LOGOUT
-  // =========================
   async function logout() {
     await signOut(auth);
 
     setUser(null);
     setUserProfile(null);
+    mockAdminSessionRef.current = false;
 
     setSessionExpired(false);
     setCountdown(3);
   }
 
-  // =========================
-  // AUTH OBSERVER
-  // =========================
+  async function updateProfile(profileData) {
+    if (!user) {
+      throw new Error("Utilizador não autenticado.");
+    }
+
+    const payload = {
+      name: (profileData?.name || "").trim(),
+      phone: formatPhoneByThreeDigits(profileData?.phone || ""),
+    };
+
+    if (mockAdminSessionRef.current) {
+      setUserProfile((prev) => ({
+        ...(prev || {}),
+        ...payload,
+      }));
+      return;
+    }
+
+    await updateDoc(doc(db, "users", user.uid), payload);
+
+    setUserProfile((prev) => ({
+      ...(prev || {}),
+      ...payload,
+    }));
+  }
+
+  async function changePassword(currentPassword, newPassword) {
+    if (mockAdminSessionRef.current) {
+      throw new Error("Alteração de senha não disponível para o admin fixo de desenvolvimento.");
+    }
+
+    if (!auth.currentUser || !auth.currentUser.email) {
+      throw new Error("Utilizador não autenticado para alteração de senha.");
+    }
+
+    const credential = EmailAuthProvider.credential(
+      auth.currentUser.email,
+      currentPassword
+    );
+
+    await reauthenticateWithCredential(auth.currentUser, credential);
+    await updatePassword(auth.currentUser, newPassword);
+  }
+
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        async (firebaseUser) => {
-          // Ignora Firebase quando
-          // estiver usando admin fake
-          if (
-            user?.uid ===
-            "admin-fixo-desenvolvimento-123"
-          ) {
-            return;
-          }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (mockAdminSessionRef.current) {
+        setLoading(false);
+        return;
+      }
 
-          if (firebaseUser) {
-            setUser(firebaseUser);
+      if (firebaseUser) {
+        setUser(firebaseUser);
 
-            const userDoc =
-              await getDoc(
-                doc(
-                  db,
-                  "users",
-                  firebaseUser.uid
-                )
-              );
+        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
-            if (userDoc.exists()) {
-              setUserProfile(
-                userDoc.data()
-              );
-            } else {
-              setUserProfile(null);
-            }
-          } else {
-            setUser(null);
-            setUserProfile(null);
-          }
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data());
+        } else {
+          setUserProfile(null);
         }
-      );
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
+
+      setLoading(false);
+    });
 
     return unsubscribe;
-  }, [user]);
+  }, []);
 
-  // =========================
-  // AUTO LOGOUT
-  // =========================
   useEffect(() => {
     if (!user) return;
 
@@ -216,11 +218,11 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
-
-        isAdmin:
-          userProfile?.role ===
-          "admin",
-
+        updateProfile,
+        changePassword,
+        canChangePassword,
+        loading,
+        isAdmin: userProfile?.role === "admin",
         sessionExpired,
         countdown,
       }}
@@ -231,13 +233,10 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context =
-    useContext(AuthContext);
+  const context = useContext(AuthContext);
 
   if (context === undefined) {
-    throw new Error(
-      "useAuth deve ser usado dentro de AuthProvider"
-    );
+    throw new Error("useAuth deve ser usado dentro de AuthProvider");
   }
 
   return context;
