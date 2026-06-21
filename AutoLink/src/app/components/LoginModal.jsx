@@ -1,4 +1,4 @@
-﻿ import { X, Shield, AlertCircle } from "lucide-react";
+﻿import { X, Shield, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../../firebase/firebase"; // Verifique este caminho!
@@ -15,94 +15,113 @@ export function LoginModal({ isOpen, onClose }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const getFriendlyError = (error) => {
-  switch (error.code) {
-    case "auth/invalid-credential":
-      return "E-mail ou senha incorretos.";
+    switch (error.code) {
+      case "auth/invalid-credential":
+        return "E-mail ou senha incorretos.";
 
-    case "auth/email-already-in-use":
-      return "Este e-mail já está cadastrado.";
+      case "auth/email-already-in-use":
+        return "Este e-mail já está cadastrado.";
 
-    case "auth/weak-password":
-      return "A senha deve ter pelo menos 6 caracteres.";
+      case "auth/weak-password":
+        return "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial.";
 
-    case "auth/invalid-email":
-      return "Digite um e-mail válido.";
+      case "auth/invalid-email":
+        return "Digite um e-mail válido.";
 
-    case "auth/too-many-requests":
-      return "Muitas tentativas. Tente novamente mais tarde.";
+      case "auth/too-many-requests":
+        return "Muitas tentativas. Tente novamente mais tarde.";
 
-    default:
-      return "Ocorreu um erro. Tente novamente.";
-  }
-};
+      default:
+        return "Ocorreu um erro. Tente novamente.";
+    }
+  };
 
   const handleGoogleLogin = async () => {
-  const provider = new GoogleAuthProvider();
+    const provider = new GoogleAuthProvider();
 
-  try {
-    await signInWithPopup(auth, provider);
-    onClose();
-  } catch (err) {
-    setError(getFriendlyError(err));
-  }
-};
+    try {
+      await signInWithPopup(auth, provider);
+      onClose();
+    } catch (err) {
+      setError(getFriendlyError(err));
+    }
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-
-  // Validações personalizadas
-  if (isRegistering && !name.trim()) {
-    setError("Digite o seu nome.");
-    return;
-  }
-
-  if (!email.trim()) {
-    setError("Digite o seu e-mail.");
-    return;
-  }
-
-  if (!password.trim()) {
-    setError("Digite a sua senha.");
-    return;
-  }
-
-  if (isRegistering && !confirmPassword.trim()) {
-    setError("Confirme a sua senha.");
-    return;
-  }
-
-  if (isRegistering && !phone.trim()) {
-    setError("Digite o seu telefone.");
-    return;
-  }
-
-  if (isRegistering && password !== confirmPassword) {
-    setError("As senhas precisam ser iguais.");
-    return;
-  }
-
-  try {
-    if (isRegistering) {
-      await register(name, email, password, phone);
-    } else {
-      await login(email, password);
+    e.preventDefault();
+    setError("");
+    const cleanName = name.trim();
+    if (!email.trim()) {
+      setError("Digite o seu e-mail.");
+      return;
     }
 
-    onClose();
-  } catch (err) {
-    setError(getFriendlyError(err));
-  }
-};
+    if (!password.trim()) {
+      setError("Digite a sua senha.");
+      return;
+    }
+
+    if (isRegistering) {
+
+      if (!cleanName) {
+        setError("Digite o seu nome.");
+        return;
+      }
+
+      if (cleanName.length < 3) {
+        setError("O nome deve ter pelo menos 3 letras.");
+        return;
+      }
+
+      if (!/^[A-Za-zÀ-ÿ\s]+$/.test(cleanName)) {
+        setError("O nome deve conter apenas letras.");
+        return;
+      }
+
+      const phoneNumbers = phone.replace(/\D/g, "");
+
+      if (phoneNumbers.length < 9) {
+        setError("Digite um telefone válido.");
+        return;
+      }
+
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
+
+      if (!passwordRegex.test(password)) {
+        setError(
+          "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial."
+        );
+        return;
+      }
+    }
+
+    if (isRegistering && password !== confirmPassword) {
+      setError("As senhas precisam ser iguais.");
+      return;
+    }
+
+    try {
+      if (isRegistering) {
+        await register(cleanName, email, password, phone);
+      } else {
+        await login(email, password);
+      }
+
+      onClose();
+    } catch (err) {
+      setError(getFriendlyError(err));
+    }
+  };
   const handleToggleMode = () => {
-  setIsRegistering((prev) => !prev);
-  setError("");
-  setName("");
-  setPhone("");
-  setEmail("");
-  setPassword("");
-  setConfirmPassword("");
-};
+    setIsRegistering((prev) => !prev);
+    setError("");
+    setName("");
+    setPhone("");
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+  };
 
   if (!isOpen) return null;
 
@@ -114,7 +133,7 @@ export function LoginModal({ isOpen, onClose }) {
           <button className="login-modal-close" onClick={onClose}><X /></button>
         </div>
 
-        <form onSubmit={handleSubmit}className="login-modal-form"noValidate>
+        <form onSubmit={handleSubmit} className="login-modal-form" noValidate>
           {error && (
             <div className="login-alert login-alert-error">
               <AlertCircle size={18} />
@@ -129,8 +148,9 @@ export function LoginModal({ isOpen, onClose }) {
                 type="text"
                 className="login-modal-input"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                
+                onChange={(e) =>
+                  setName(e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ""))}
+
               />
             </div>
           )}
@@ -140,7 +160,7 @@ export function LoginModal({ isOpen, onClose }) {
             <input
               type="email" className="login-modal-input"
               value={email} onChange={(e) => setEmail(e.target.value)}
-              
+
             />
           </div>
 
@@ -149,7 +169,7 @@ export function LoginModal({ isOpen, onClose }) {
             <input
               type="password" className="login-modal-input"
               value={password} onChange={(e) => setPassword(e.target.value)}
-              
+
             />
           </div>
 
@@ -162,19 +182,22 @@ export function LoginModal({ isOpen, onClose }) {
                   className="login-modal-input"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                 
+
                 />
               </div>
 
               <div className="login-modal-group">
                 <label className="login-modal-label">Telefone</label>
                 <input
-                  type="text"
+                  type="tel"
                   className="login-modal-input"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                 
+                  onChange={(e) =>
+                    setPhone(e.target.value.replace(/\D/g, ""))
+                  }
+                  maxLength={9}
                 />
+
               </div>
             </>
           )}
