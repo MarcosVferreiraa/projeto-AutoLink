@@ -82,6 +82,7 @@ export function ProfileModal({
 
   const handleSaveProfile = async (event) => {
     event.preventDefault();
+    setProfileSaveMessage("");
     const phoneNumbers = profilePhone.replace(/\D/g, "");
 
     if (phoneNumbers.length < 9) {
@@ -125,6 +126,7 @@ export function ProfileModal({
 
   const handleChangePassword = async (event) => {
     event.preventDefault();
+    setPasswordSaveMessage("");
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordSaveMessage("Preencha todos os campos de senha.");
@@ -154,6 +156,8 @@ export function ProfileModal({
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setPasswordSaveMessage("");
+      setProfileSaveMessage("");
     } catch (error) {
       console.error(error);
       setPasswordSaveMessage(error?.message || "Não foi possível alterar a senha agora.");
@@ -278,14 +282,15 @@ export function ProfileModal({
                     )
                   )
                 }
+                maxLength={11}
                 placeholder="912 345 678"
               />
 
               {profileSaveMessage && (
                 <div
                   className={`profile-alert ${profileSaveMessage.includes("sucesso")
-                      ? "profile-alert-success"
-                      : "profile-alert-error"
+                    ? "profile-alert-success"
+                    : "profile-alert-error"
                     }`}
                 >
                   {profileSaveMessage.includes("sucesso") ? (
