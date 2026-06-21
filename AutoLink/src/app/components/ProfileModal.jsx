@@ -59,7 +59,7 @@ export function ProfileModal({
         userProfile?.phone || userProfile?.phoneNumber || ""
       )
     );
-    
+
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -82,9 +82,27 @@ export function ProfileModal({
 
   const handleSaveProfile = async (event) => {
     event.preventDefault();
+    const phoneNumbers = profilePhone.replace(/\D/g, "");
 
-    if (!profileName.trim()) {
+    if (phoneNumbers.length < 9) {
+      setProfileSaveMessage("Digite um telefone válido.");
+      return;
+    }
+
+    const cleanName = profileName.trim();
+
+    if (!cleanName) {
       setProfileSaveMessage("Informe um nome válido.");
+      return;
+    }
+
+    if (cleanName.length < 3) {
+      setProfileSaveMessage("O nome deve ter pelo menos 3 letras.");
+      return;
+    }
+
+    if (!/^[A-Za-zÀ-ÿ\s]+$/.test(cleanName)) {
+      setProfileSaveMessage("O nome deve conter apenas letras.");
       return;
     }
 
@@ -93,10 +111,9 @@ export function ProfileModal({
       setProfileSaveMessage("");
 
       await updateProfile({
-        name: profileName,
+        name: cleanName,
         phone: formatPhoneByThreeDigits(profilePhone),
       });
-
       setProfileSaveMessage("Perfil atualizado com sucesso.");
     } catch (error) {
       console.error(error);
@@ -114,8 +131,13 @@ export function ProfileModal({
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordSaveMessage("A nova senha deve ter pelo menos 6 caracteres.");
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
+
+    if (!passwordRegex.test(newPassword)) {
+      setPasswordSaveMessage(
+        "A nova senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial."
+      );
       return;
     }
 
@@ -235,7 +257,11 @@ export function ProfileModal({
                 id="profile-name"
                 type="text"
                 value={profileName}
-                onChange={(event) => setProfileName(event.target.value)}
+                onChange={(event) =>
+                  setProfileName(
+                    event.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, "")
+                  )
+                }
                 placeholder="Seu nome"
                 required
               />
@@ -245,27 +271,32 @@ export function ProfileModal({
                 id="profile-phone"
                 type="text"
                 value={profilePhone}
-                onChange={(event) => setProfilePhone(formatPhoneByThreeDigits(event.target.value))}
+                onChange={(event) =>
+                  setProfilePhone(
+                    formatPhoneByThreeDigits(
+                      event.target.value.replace(/\D/g, "")
+                    )
+                  )
+                }
                 placeholder="912 345 678"
               />
 
               {profileSaveMessage && (
-  <div
-    className={`profile-alert ${
-      profileSaveMessage.includes("sucesso")
-        ? "profile-alert-success"
-        : "profile-alert-error"
-    }`}
-  >
-    {profileSaveMessage.includes("sucesso") ? (
-      <CheckCircle size={18} />
-    ) : (
-      <AlertCircle size={18} />
-    )}
+                <div
+                  className={`profile-alert ${profileSaveMessage.includes("sucesso")
+                      ? "profile-alert-success"
+                      : "profile-alert-error"
+                    }`}
+                >
+                  {profileSaveMessage.includes("sucesso") ? (
+                    <CheckCircle size={18} />
+                  ) : (
+                    <AlertCircle size={18} />
+                  )}
 
-    <span>{profileSaveMessage}</span>
-  </div>
-)}
+                  <span>{profileSaveMessage}</span>
+                </div>
+              )}
 
               <button type="submit" className="profile-modal-edit-submit" disabled={isSavingProfile}>
                 {isSavingProfile ? "A guardar..." : "Guardar Perfil"}
@@ -287,7 +318,7 @@ export function ProfileModal({
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
                   placeholder="Digite a senha atual"
-                 
+
                 />
 
                 <label htmlFor="profile-new-password">Nova senha</label>
@@ -296,8 +327,8 @@ export function ProfileModal({
                   type="password"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  
+                  placeholder="8+ caracteres, maiúscula, minúscula, número e símbolo"
+
                 />
 
                 <label htmlFor="profile-confirm-password">Confirmar nova senha</label>
@@ -307,14 +338,14 @@ export function ProfileModal({
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Repita a nova senha"
-                 
+
                 />
 
                 {passwordSaveMessage && (
                   <div
                     className={`profile-alert ${passwordSaveMessage.includes("sucesso")
-                        ? "profile-alert-success"
-                        : "profile-alert-error"
+                      ? "profile-alert-success"
+                      : "profile-alert-error"
                       }`}
                   >
                     {passwordSaveMessage}
