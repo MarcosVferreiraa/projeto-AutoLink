@@ -7,16 +7,18 @@ import { LoginModal } from '../components/LoginModal';
 import { useCars } from '../context/CarContext'
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
-import "./Home.css"; 
+import "./Home.css";
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export function Home() {
   const navigate = useNavigate();
   const { cars, addCar, removeCar } = useCars();
   const { user, isAdmin } = useAuth();
-  
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Estado para controlar o modal de login
-  
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [carToDelete, setCarToDelete] = useState(null);
+
   // Estado para os filtros da Sidebar lateral esquerda
   const [filters, setFilters] = useState({
     search: '',
@@ -38,7 +40,7 @@ export function Home() {
       alert("Você precisa estar logado para anunciar um veículo!");
       setIsLoginModalOpen(true); //  Abre o modal de login diretamente em vez de redirecionar
     } else {
-      setIsAddCarModalOpen(true); 
+      setIsAddCarModalOpen(true);
     }
   };
 
@@ -47,12 +49,20 @@ export function Home() {
     try {
       const carWithAuthor = {
         ...newCarData,
-        userId: user.uid || user.id 
+        userId: user.uid || user.id
       };
       await addCar(carWithAuthor);
     } catch (error) {
       console.error("Erro ao adicionar veículo:", error);
     }
+  };
+  const handleDeleteCar = async () => {
+    if (!carToDelete) return;
+
+    await removeCar(carToDelete);
+
+    setCarToDelete(null);
+    setIsDeleteModalOpen(false);
   };
 
   // filtros da Sidebar esquerda
@@ -60,20 +70,20 @@ export function Home() {
     const matchesSearch = filters.search === '' ||
       (car.brand && car.brand.toLowerCase().includes(filters.search.toLowerCase())) ||
       (car.model && car.model.toLowerCase().includes(filters.search.toLowerCase()));
-    
+
     const matchesBrand = filters.brand === '' || car.brand === filters.brand;
-    
+
     const matchesMinPrice = filters.minPrice === '' || Number(car.price) >= Number(filters.minPrice);
     const matchesMaxPrice = filters.maxPrice === '' || Number(car.price) <= Number(filters.maxPrice);
-    
+
     const matchesMinYear = filters.minYear === '' || Number(car.year) >= Number(filters.minYear);
     const matchesMaxYear = filters.maxYear === '' || Number(car.year) <= Number(filters.maxYear);
-    
+
     const matchesFuel = filters.fuel === '' || car.fuel === filters.fuel;
     const matchesTransmission = filters.transmission === '' || car.transmission === filters.transmission;
 
     return matchesSearch && matchesBrand && matchesMinPrice && matchesMaxPrice &&
-           matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
+      matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
   });
 
   // ordenação do filtro da direita nos carros filtrados
@@ -90,7 +100,7 @@ export function Home() {
     if (sortCriterion === 'Km (menor)') {
       return Number(a.mileage) - Number(b.mileage);
     }
-    return 0; 
+    return 0;
   });
 
   return (
@@ -103,9 +113,20 @@ export function Home() {
       />
 
       {/* 4. Modal de Login inserido na árvore de renderização */}
-      <LoginModal 
+      <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setCarToDelete(null);
+        }}
+        onConfirm={handleDeleteCar}
+        title="Excluir veículo"
+        message="Esta ação não pode ser desfeita. Deseja continuar?"
       />
 
       {/* Botão Flutuante */}
@@ -162,7 +183,7 @@ export function Home() {
               </div>
 
               <div className="flex items-center gap-2">
-                <select 
+                <select
                   className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   value={sortCriterion}
                   onChange={(e) => setSortCriterion(e.target.value)}
@@ -182,11 +203,11 @@ export function Home() {
                   <div key={car.id} className="relative">
                     <CarCard {...car} />
                     {isAdmin && (
-                      <button
-                        onClick={() => removeCar(car.id)}
-                        title="Remover carro"
-                        className="absolute top-3 right-3 w-8 h-8 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity z-10"
-                      >
+                      <button className="absolute top-3 right-3 w-8 h-8 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity z-10"
+                        onClick={() => {
+                          setCarToDelete(car.id);
+                          setIsDeleteModalOpen(true);
+                        }} >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     )}

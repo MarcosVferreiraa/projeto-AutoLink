@@ -9,6 +9,7 @@ import { useProposals } from '../context/ProposalsContext';
 import { db } from '../../firebase/firebase';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './CarDetails.css';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export function CarDetails() {
   const { id } = useParams();
@@ -18,13 +19,14 @@ export function CarDetails() {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addProposal } = useProposals();
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [proposalValue, setProposalValue] = useState('');
   const [proposalMessage, setProposalMessage] = useState('');
   const [proposalError, setProposalError] = useState('');
   const [isSendingProposal, setIsSendingProposal] = useState(false);
   const [ownerInfo, setOwnerInfo] = useState(null);
   const [isOwnerLoading, setIsOwnerLoading] = useState(false);
-  
+
   const car = cars?.find(c => String(c.id) === String(id));
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export function CarDetails() {
           <img src={car.image} alt={car.model} className="car-main-image" />
           <h1>{car.brand} {car.model}</h1>
           <div className="car-price-value">R$ {Number(car.price).toLocaleString('pt-BR')}</div>
-          
+
           {/* Grade de Especificações */}
           <div className="specs-grid">
             <div className="spec-item"><Calendar size={20} /> <span>{car.year}</span></div>
@@ -177,18 +179,25 @@ export function CarDetails() {
         <aside className="car-sidebar">
           <div className="sidebar-sticky-card">
             <h3>Negociação</h3>
-            <button onClick={() => toggleFavorite(car.id)} className="btn-action">
-              <Heart size={18} /> {isFavorite(car.id) ? 'Favoritado' : 'Favoritar'}
+            <button
+              onClick={() => toggleFavorite(car.id)}
+              className={`btn-action ${isFavorite(car.id) ? 'favorite-active' : ''}`}
+            >
+              <Heart size={18} />
+              {isFavorite(car.id) ? 'Favoritado' : 'Favoritar'}
             </button>
             <button onClick={openProposalModal} className="btn-action">
               <Send size={18} /> Enviar Proposta
             </button>
             <Link to="/financiamento" state={{ car }} className="btn-action"><Calculator size={18} /> Simular Financiamento</Link>
-            
+
             {canEdit && (
               <>
                 <Link to={`/carro/${id}/editar`} className="btn-action"><Edit size={18} /> Editar Anúncio</Link>
-                <button onClick={() => removeCar(car.id)} className="btn-action"><Trash2 size={18} /> Remover Veículo</button>
+                <button
+  onClick={() => setIsDeleteModalOpen(true)}
+  className="btn-action"
+><Trash2 size={18} /> Remover Veículo</button>
               </>
             )}
           </div>
@@ -243,6 +252,16 @@ export function CarDetails() {
           </div>
         </div>
       )}
+      <ConfirmModal
+  isOpen={isDeleteModalOpen}
+  onClose={() => setIsDeleteModalOpen(false)}
+  onConfirm={() => {
+    removeCar(car.id);
+    navigate('/');
+  }}
+  title="Excluir veículo"
+  message="Esta ação não pode ser desfeita. Deseja continuar?"
+/>
     </div>
   );
 }

@@ -7,6 +7,9 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   transition: box-shadow 0.2s ease;
 }
+.car-card {
+  cursor: pointer;
+}
 
 .car-card:hover {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);

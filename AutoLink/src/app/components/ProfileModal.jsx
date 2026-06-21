@@ -9,6 +9,8 @@ import {
   Car,
   LogOut,
   Shield,
+  CheckCircle,
+  AlertCircle
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -57,7 +59,7 @@ export function ProfileModal({
         userProfile?.phone || userProfile?.phoneNumber || ""
       )
     );
-    setProfileSaveMessage("");
+    
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -70,13 +72,13 @@ export function ProfileModal({
     getUserProposals?.(user.uid || user.id) || [];
 
   const handleLogout = async () => {
-  try {
-    await logout();
-    onClose();
-  } catch (error) {
-    console.error(error);
-  }
-};
+    try {
+      await logout();
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSaveProfile = async (event) => {
     event.preventDefault();
@@ -248,10 +250,22 @@ export function ProfileModal({
               />
 
               {profileSaveMessage && (
-                <p className="profile-modal-edit-feedback">
-                  {profileSaveMessage}
-                </p>
-              )}
+  <div
+    className={`profile-alert ${
+      profileSaveMessage.includes("sucesso")
+        ? "profile-alert-success"
+        : "profile-alert-error"
+    }`}
+  >
+    {profileSaveMessage.includes("sucesso") ? (
+      <CheckCircle size={18} />
+    ) : (
+      <AlertCircle size={18} />
+    )}
+
+    <span>{profileSaveMessage}</span>
+  </div>
+)}
 
               <button type="submit" className="profile-modal-edit-submit" disabled={isSavingProfile}>
                 {isSavingProfile ? "A guardar..." : "Guardar Perfil"}
@@ -273,7 +287,7 @@ export function ProfileModal({
                   value={currentPassword}
                   onChange={(event) => setCurrentPassword(event.target.value)}
                   placeholder="Digite a senha atual"
-                  required
+                 
                 />
 
                 <label htmlFor="profile-new-password">Nova senha</label>
@@ -283,7 +297,7 @@ export function ProfileModal({
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   placeholder="Mínimo 6 caracteres"
-                  required
+                  
                 />
 
                 <label htmlFor="profile-confirm-password">Confirmar nova senha</label>
@@ -293,13 +307,18 @@ export function ProfileModal({
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
                   placeholder="Repita a nova senha"
-                  required
+                 
                 />
 
                 {passwordSaveMessage && (
-                  <p className="profile-modal-edit-feedback">
+                  <div
+                    className={`profile-alert ${passwordSaveMessage.includes("sucesso")
+                        ? "profile-alert-success"
+                        : "profile-alert-error"
+                      }`}
+                  >
                     {passwordSaveMessage}
-                  </p>
+                  </div>
                 )}
 
                 <button type="submit" className="profile-modal-edit-submit" disabled={isChangingPassword}>

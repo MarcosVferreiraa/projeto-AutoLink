@@ -111,6 +111,8 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                 <option value="Jeep">Jeep</option>
                 <option value="Fiat">Fiat</option>
                 <option value="Ferrari">Ferrari</option>
+                <option value="Porsche">Porsche</option>
+
 
               </select>
             </div>

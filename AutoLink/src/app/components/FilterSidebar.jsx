@@ -52,6 +52,11 @@ export function FilterSidebar({ onFilterChange }) {
             <option value="Volkswagen">Volkswagen</option>
             <option value="Chevrolet">Chevrolet</option>
             <option value="Ford">Ford</option>
+            <option value="Ferrari">Ferrari</option>
+            <option value="Porsche">Porsche</option>
+
+
+
           </select>
         </div>
 
