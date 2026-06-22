@@ -16,11 +16,68 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
     description: "",
     features: "",
   });
+  const [errors, setErrors] = useState({});
+
 
   if (!isOpen) return null;
 
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.image.trim()) {
+      newErrors.image = "Informe a URL da imagem";
+    } else {
+      try {
+        new URL(formData.image);
+      } catch {
+        newErrors.image = "URL inválida";
+      }
+    }
+
+    if (!formData.brand) {
+      newErrors.brand = "Selecione uma marca";
+    }
+
+    if (!formData.model.trim()) {
+      newErrors.model = "Informe o modelo";
+    }
+
+    if (
+      formData.year < 1990 ||
+      formData.year > new Date().getFullYear() + 1
+    ) {
+      newErrors.year = "Ano inválido";
+    }
+
+    if (formData.price <= 0) {
+      newErrors.price = "Informe um preço válido";
+    }
+
+    if (formData.mileage < 0) {
+      newErrors.mileage = "Quilometragem inválida";
+    }
+
+    if (!formData.color.trim()) {
+      newErrors.color = "Informe a cor";
+    }
+
+    if (formData.description.trim().length < 20) {
+      newErrors.description =
+        "A descrição deve ter pelo menos 20 caracteres";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     const featuresArray = formData.features
       .split(",")
@@ -46,17 +103,28 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
       features: "",
     });
 
+    setErrors({});
+
     onClose();
   };
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "year" || name === "price" || name === "mileage"
+        name === "year" ||
+          name === "price" ||
+          name === "mileage"
           ? Number(value)
           : value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
     }));
   };
 
@@ -82,39 +150,48 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                   value={formData.image}
                   onChange={handleChange}
                   placeholder="https://exemplo.com/imagem.jpg"
-                  required
-                  className={`${styles.addCarModalInput} ${styles.addCarModalImageInput}`}
+
+                  className={`${styles.addCarModalInput} ${styles.addCarModalImageInput}${errors.image ? styles.inputError : ""}`}
                 />
               </div>
+              {errors.image && (
+                <span className={styles.errorMessage}>
+                  {errors.image}
+                </span>
+              )}
             </div>
 
             <div>
               <label className={styles.addCarModalLabel}>Marca</label>
+
               <select
                 name="brand"
                 value={formData.brand}
                 onChange={handleChange}
-                required
-                className={styles.addCarModalSelect}
+                className={`${styles.addCarModalSelect} ${errors.brand ? styles.inputError : ""
+                  }`}
               >
-                <option value="">Selecione...</option>
-                <option value="BMW">BMW</option>
-                <option value="Mercedes-Benz">Mercedes-Benz</option>
                 <option value="Audi">Audi</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Honda">Honda</option>
-                <option value="Volkswagen">Volkswagen</option>
+                <option value="BMW">BMW</option>
                 <option value="Chevrolet">Chevrolet</option>
-                <option value="Ford">Ford</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Jeep">Jeep</option>
-                <option value="Fiat">Fiat</option>
                 <option value="Ferrari">Ferrari</option>
+                <option value="Fiat">Fiat</option>
+                <option value="Ford">Ford</option>
+                <option value="Honda">Honda</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Jeep">Jeep</option>
+                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                <option value="Nissan">Nissan</option>
                 <option value="Porsche">Porsche</option>
-
-
+                <option value="Toyota">Toyota</option>
+                <option value="Volkswagen">Volkswagen</option>
               </select>
+
+              {errors.brand && (
+                <span className={styles.errorMessage}>
+                  {errors.brand}
+                </span>
+              )}
             </div>
 
             <div>
@@ -125,13 +202,20 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                 value={formData.model}
                 onChange={handleChange}
                 placeholder="Ex: Civic, Corolla..."
-                required
-                className={styles.addCarModalInput}
+                className={`${styles.addCarModalInput} ${errors.model ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.model && (
+                <span className={styles.errorMessage}>
+                  {errors.model}
+                </span>
+              )}
             </div>
 
             <div>
               <label className={styles.addCarModalLabel}>Ano</label>
+
               <input
                 type="number"
                 name="year"
@@ -139,35 +223,59 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                 onChange={handleChange}
                 min="1990"
                 max={new Date().getFullYear() + 1}
-                required
-                className={styles.addCarModalInput}
+                className={`${styles.addCarModalInput} ${errors.year ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.year && (
+                <span className={styles.errorMessage}>
+                  {errors.year}
+                </span>
+              )}
             </div>
 
             <div>
-              <label className={styles.addCarModalLabel}>Preço (R$)</label>
+              <label className={styles.addCarModalLabel}>
+                Preço (R$)
+              </label>
+
               <input
                 type="number"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
                 min="0"
-                required
-                className={styles.addCarModalInput}
+                className={`${styles.addCarModalInput} ${errors.price ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.price && (
+                <span className={styles.errorMessage}>
+                  {errors.price}
+                </span>
+              )}
             </div>
 
             <div>
-              <label className={styles.addCarModalLabel}>Quilometragem (km)</label>
+              <label className={styles.addCarModalLabel}>
+                Quilometragem (km)
+              </label>
+
               <input
                 type="number"
                 name="mileage"
                 value={formData.mileage}
                 onChange={handleChange}
                 min="0"
-                required
-                className={styles.addCarModalInput}
+                className={`${styles.addCarModalInput} ${errors.mileage ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.mileage && (
+                <span className={styles.errorMessage}>
+                  {errors.mileage}
+                </span>
+              )}
             </div>
 
             <div>
@@ -176,7 +284,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                 name="fuel"
                 value={formData.fuel}
                 onChange={handleChange}
-                required
+
                 className={styles.addCarModalSelect}
               >
                 <option value="Gasolina">Gasolina</option>
@@ -193,7 +301,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
                 name="transmission"
                 value={formData.transmission}
                 onChange={handleChange}
-                required
+
                 className={styles.addCarModalSelect}
               >
                 <option value="Automático">Automático</option>
@@ -203,28 +311,44 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
 
             <div>
               <label className={styles.addCarModalLabel}>Cor</label>
+
               <input
                 type="text"
                 name="color"
                 value={formData.color}
                 onChange={handleChange}
                 placeholder="Ex: Preto, Branco..."
-                required
-                className={styles.addCarModalInput}
+                className={`${styles.addCarModalInput} ${errors.color ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.color && (
+                <span className={styles.errorMessage}>
+                  {errors.color}
+                </span>
+              )}
             </div>
 
             <div className={styles.colSpan2}>
-              <label className={styles.addCarModalLabel}>Descrição</label>
+              <label className={styles.addCarModalLabel}>
+                Descrição
+              </label>
+
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
                 placeholder="Descreva as características e estado do veículo..."
-                required
-                className={styles.addCarModalTextarea}
+                className={`${styles.addCarModalTextarea} ${errors.description ? styles.inputError : ""
+                  }`}
               />
+
+              {errors.description && (
+                <span className={styles.errorMessage}>
+                  {errors.description}
+                </span>
+              )}
             </div>
 
             <div className={styles.colSpan2}>
