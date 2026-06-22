@@ -2,7 +2,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import './FilterSidebar.css';
 
 export function FilterSidebar({ onFilterChange }) {
-  
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Atualiza o estado "filters" dentro do componente Pai (Home.jsx)
@@ -44,17 +44,20 @@ export function FilterSidebar({ onFilterChange }) {
             className="filter-sidebar-select"
           >
             <option value="">Todas</option>
-            <option value="BMW">BMW</option>
-            <option value="Mercedes-Benz">Mercedes-Benz</option>
             <option value="Audi">Audi</option>
-            <option value="Toyota">Toyota</option>
-            <option value="Honda">Honda</option>
-            <option value="Volkswagen">Volkswagen</option>
+            <option value="BMW">BMW</option>
             <option value="Chevrolet">Chevrolet</option>
-            <option value="Ford">Ford</option>
             <option value="Ferrari">Ferrari</option>
+            <option value="Fiat">Fiat</option>
+            <option value="Ford">Ford</option>
+            <option value="Honda">Honda</option>
+            <option value="Hyundai">Hyundai</option>
+            <option value="Jeep">Jeep</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+            <option value="Nissan">Nissan</option>
             <option value="Porsche">Porsche</option>
-
+            <option value="Toyota">Toyota</option>
+            <option value="Volkswagen">Volkswagen</option>
 
 
           </select>
