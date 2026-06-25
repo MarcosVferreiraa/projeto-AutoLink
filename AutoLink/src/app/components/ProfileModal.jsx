@@ -9,6 +9,7 @@ import {
   Car,
   LogOut,
   Shield,
+  Trash2,
   CheckCircle,
   AlertCircle
 } from "lucide-react";
@@ -17,6 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { useProposals } from "../context/ProposalsContext";
 import { formatPhoneByThreeDigits } from "../utils/phone";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 
 import "./ProfileModal.css";
 
@@ -31,6 +33,7 @@ export function ProfileModal({
     changePassword,
     canChangePassword,
     logout,
+    deleteAccount,
     isAdmin,
   } = useAuth();
 
@@ -43,6 +46,10 @@ export function ProfileModal({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordSaveMessage, setPasswordSaveMessage] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] =
+    useState(false);
 
   const { favoriteIds } = useFavorites();
   const proposalsContext =
@@ -70,6 +77,37 @@ export function ProfileModal({
 
   const userProposals =
     getUserProposals?.(user.uid || user.id) || [];
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      alert("Digite a sua senha para confirmar.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Tem certeza que deseja apagar permanentemente a sua conta?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setIsDeletingAccount(true);
+
+      await deleteAccount(deletePassword);
+
+      onClose();
+    } catch (error) {
+      console.error(error);
+
+      if (error.code === "auth/wrong-password") {
+        alert("Senha incorreta.");
+      } else {
+        alert("Não foi possível apagar a conta.");
+      }
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -443,6 +481,25 @@ export function ProfileModal({
 
           </div>
 
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="profile-modal-delete-account"
+          >
+            Excluir Conta
+          </button>
+          <DeleteAccountModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={async (password) => {
+              try {
+                await deleteAccount(password);
+                onClose();
+              } catch (error) {
+                console.error(error);
+                alert("Senha incorreta ou sessão expirada.");
+              }
+            }}
+          />
           <button
             onClick={handleLogout}
             className="profile-modal-logout"
