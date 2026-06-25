@@ -120,9 +120,28 @@ export function ProfileModal({
 
   const handleSaveProfile = async (event) => {
     event.preventDefault();
+    setProfileSaveMessage("");
+    const phoneNumbers = profilePhone.replace(/\D/g, "");
 
-    if (!profileName.trim()) {
+    if (phoneNumbers.length < 9) {
+      setProfileSaveMessage("Digite um telefone válido.");
+      return;
+    }
+
+    const cleanName = profileName.trim();
+
+    if (!cleanName) {
       setProfileSaveMessage("Informe um nome válido.");
+      return;
+    }
+
+    if (cleanName.length < 3) {
+      setProfileSaveMessage("O nome deve ter pelo menos 3 letras.");
+      return;
+    }
+
+    if (!/^[A-Za-zÀ-ÿ\s]+$/.test(cleanName)) {
+      setProfileSaveMessage("O nome deve conter apenas letras.");
       return;
     }
 
@@ -131,10 +150,9 @@ export function ProfileModal({
       setProfileSaveMessage("");
 
       await updateProfile({
-        name: profileName,
+        name: cleanName,
         phone: formatPhoneByThreeDigits(profilePhone),
       });
-
       setProfileSaveMessage("Perfil atualizado com sucesso.");
     } catch (error) {
       console.error(error);
@@ -146,14 +164,20 @@ export function ProfileModal({
 
   const handleChangePassword = async (event) => {
     event.preventDefault();
+    setPasswordSaveMessage("");
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       setPasswordSaveMessage("Preencha todos os campos de senha.");
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordSaveMessage("A nova senha deve ter pelo menos 6 caracteres.");
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
+
+    if (!passwordRegex.test(newPassword)) {
+      setPasswordSaveMessage(
+        "A nova senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial."
+      );
       return;
     }
 
@@ -170,6 +194,8 @@ export function ProfileModal({
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setPasswordSaveMessage("");
+      setProfileSaveMessage("");
     } catch (error) {
       console.error(error);
       setPasswordSaveMessage(error?.message || "Não foi possível alterar a senha agora.");
@@ -273,7 +299,11 @@ export function ProfileModal({
                 id="profile-name"
                 type="text"
                 value={profileName}
-                onChange={(event) => setProfileName(event.target.value)}
+                onChange={(event) =>
+                  setProfileName(
+                    event.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, "")
+                  )
+                }
                 placeholder="Seu nome"
                 required
               />
@@ -283,7 +313,14 @@ export function ProfileModal({
                 id="profile-phone"
                 type="text"
                 value={profilePhone}
-                onChange={(event) => setProfilePhone(formatPhoneByThreeDigits(event.target.value))}
+                onChange={(event) =>
+                  setProfilePhone(
+                    formatPhoneByThreeDigits(
+                      event.target.value.replace(/\D/g, "")
+                    )
+                  )
+                }
+                maxLength={11}
                 placeholder="912 345 678"
               />
 
@@ -333,7 +370,7 @@ export function ProfileModal({
                   type="password"
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="8+ caracteres, maiúscula, minúscula, número e símbolo"
 
                 />
 
