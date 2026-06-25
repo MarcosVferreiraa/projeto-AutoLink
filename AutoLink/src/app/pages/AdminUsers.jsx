@@ -8,12 +8,62 @@ import { formatPhoneByThreeDigits } from '../utils/phone';
 import './AdminUsers.css';
 
 export function AdminUsers() {
+
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [processingUserId, setProcessingUserId] = useState("");
+  const [nameFilter, setNameFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [ageFilter, setAgeFilter] = useState("");
 
+  const calculateAge = (birthDate) => {
+    if (!birthDate) return null;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
+
+  const filteredUsers = usersList.filter((account) => {
+    const age = calculateAge(account.birthDate);
+
+    const matchesName =
+      !nameFilter ||
+      (account.name || "")
+        .toLowerCase()
+        .includes(nameFilter.toLowerCase());
+
+    const matchesRole =
+      !roleFilter || account.role === roleFilter;
+
+    let matchesAge = true;
+
+    if (ageFilter === "18-25") {
+      matchesAge = age >= 18 && age <= 25;
+    } else if (ageFilter === "26-35") {
+      matchesAge = age >= 26 && age <= 35;
+    } else if (ageFilter === "36-50") {
+      matchesAge = age >= 36 && age <= 50;
+    } else if (ageFilter === "51+") {
+      matchesAge = age >= 51;
+    }
+
+    return matchesName && matchesRole && matchesAge;
+  });
   useEffect(() => {
     if (!user || !isAdmin) {
       navigate('/');
@@ -22,6 +72,8 @@ export function AdminUsers() {
 
     fetchUsers();
   }, [user, isAdmin, navigate]);
+
+
 
   const fetchUsers = async () => {
     try {
@@ -81,8 +133,38 @@ export function AdminUsers() {
     <div className="admin-users-container">
       <h1>Gestão de Utilizadores</h1>
       {isLoadingUsers && <p>A carregar utilizadores...</p>}
+
+      <div className="users-filters">
+        <input
+          type="text"
+          placeholder="Pesquisar nome..."
+          value={nameFilter}
+          onChange={(e) => setNameFilter(e.target.value)}
+        />
+
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+        >
+          <option value="">Todos os perfis</option>
+          <option value="user">Utilizadores</option>
+          <option value="admin">Administradores</option>
+        </select>
+
+        <select
+          value={ageFilter}
+          onChange={(e) => setAgeFilter(e.target.value)}
+        >
+          <option value="">Todas as idades</option>
+          <option value="18-25">18 - 25 anos</option>
+          <option value="26-35">26 - 35 anos</option>
+          <option value="36-50">36 - 50 anos</option>
+          <option value="51+">51+ anos</option>
+        </select>
+      </div>
+
       <div className="user-grid">
-        {usersList.map((account) => (
+        {filteredUsers.map((account) => (
           <div key={account.id} className="user-card">
             <div className="user-card-header">
               <h3>{account.name || "Sem nome"}</h3>
@@ -92,6 +174,12 @@ export function AdminUsers() {
               <div className="user-info-row"><Mail size={16} /> {account.email}</div>
               {(account.phone || account.phoneNumber) && (
                 <div className="user-info-row"><Phone size={16} /> {formatPhoneByThreeDigits(account.phone || account.phoneNumber)}</div>
+              )}
+              {account.birthDate && (
+                <div className="user-info-row">
+                  <Users size={16} />
+                  {calculateAge(account.birthDate)} anos ({account.birthDate})
+                </div>
               )}
             </div>
             <div className="user-card-footer">

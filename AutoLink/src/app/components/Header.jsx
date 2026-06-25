@@ -1,10 +1,13 @@
 import { Link } from "react-router";
+import { useState } from "react";
 import {
   Phone,
   Mail,
   User,
   LogIn,
   Shield,
+  Menu,
+  X,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +25,8 @@ export function Header({
     userProfile,
     isAdmin,
   } = useAuth();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const displayName =
     userProfile?.name ||
@@ -81,7 +86,7 @@ export function Header({
                 Painel Admin
               </Link>
             )}
-           <Link
+            <Link
               to="/financiamento"
               className="header-link"
             >
@@ -102,6 +107,14 @@ export function Header({
               Contato
             </Link>
           </nav>
+          <button
+            className="mobile-menu-button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <div className="header-contact"></div>
 
           <div className="header-contact">
 
@@ -149,6 +162,73 @@ export function Header({
           </div>
 
         </div>
+
+        {isMenuOpen && (
+          <div className="mobile-menu">
+
+            <Link
+              to="/"
+              className="mobile-menu-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Início
+            </Link>
+
+            <Link
+              to="/favoritos"
+              className="mobile-menu-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Favoritos
+            </Link>
+
+            {user && !isAdmin && (
+              <Link
+                to="/propostas"
+                className="mobile-menu-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Minhas Propostas
+              </Link>
+            )}
+
+            {isAdmin && (
+              <Link
+                to="/admin/propostas"
+                className="mobile-menu-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Painel Admin
+              </Link>
+            )}
+
+            <Link
+              to="/financiamento"
+              className="mobile-menu-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Financiamento
+            </Link>
+
+            <Link
+              to="/sobre"
+              className="mobile-menu-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sobre
+            </Link>
+
+            <Link
+              to="/contato"
+              className="mobile-menu-link"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contato
+            </Link>
+
+          </div>
+        )}
+
       </div>
     </header>
   );

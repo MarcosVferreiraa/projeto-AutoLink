@@ -14,17 +14,14 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
+  deleteUser,
 } from "firebase/auth";
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-
+import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { auth, db } from "../../firebase/firebase";
 import { formatPhoneByThreeDigits } from "../utils/phone";
+
+
 
 const AuthContext = createContext(undefined);
 
@@ -67,8 +64,35 @@ export function AuthProvider({ children }) {
 
     return await signInWithEmailAndPassword(auth, email, password);
   }
+  async function deleteAccount(password) {
+    if (!auth.currentUser) {
+      throw new Error("Utilizador não autenticado.");
+    }
 
-  async function register(name, email, password, phone, role = "user") {
+    const currentUser = auth.currentUser;
+
+
+    const credential = EmailAuthProvider.credential(
+      currentUser.email,
+      password
+    );
+
+    await reauthenticateWithCredential(
+      currentUser,
+      credential
+    );
+
+
+    await deleteDoc(doc(db, "users", currentUser.uid));
+
+
+    await deleteUser(currentUser);
+
+    setUser(null);
+    setUserProfile(null);
+  }
+
+  async function register(name, email, password, phone, birthDate, role = "user") {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
@@ -81,6 +105,7 @@ export function AuthProvider({ children }) {
       email,
       phone: formatPhoneByThreeDigits(phone),
       role,
+      birthDate,
       approved: false,
       createdAt: new Date(),
     });
@@ -218,6 +243,7 @@ export function AuthProvider({ children }) {
         login,
         register,
         logout,
+        deleteAccount,
         updateProfile,
         changePassword,
         canChangePassword,

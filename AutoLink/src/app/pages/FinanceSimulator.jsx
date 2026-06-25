@@ -386,7 +386,7 @@ export function FinanceSimulator() {
       {isProposalModalOpen && (
         <div className="finance-proposal-modal-overlay" onClick={() => setIsProposalModalOpen(false)}>
           <div className="finance-proposal-modal" onClick={(event) => event.stopPropagation()}>
-            <h3>Enviar Proposta ao Admin</h3>
+             
             <p className="finance-proposal-subtitle">
               {selectedCar ? `${selectedCar.brand} ${selectedCar.model} (${selectedCar.year})` : 'Proposta com base na sua simulação atual'}
             </p>

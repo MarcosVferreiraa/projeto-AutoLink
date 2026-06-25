@@ -11,6 +11,7 @@ export function LoginModal({ isOpen, onClose }) {
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +46,24 @@ export function LoginModal({ isOpen, onClose }) {
     } catch (err) {
       setError(getFriendlyError(err));
     }
+  };
+
+  const calculateAge = (birthDate) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
   };
 
   const handleSubmit = async (e) => {
@@ -84,6 +103,19 @@ export function LoginModal({ isOpen, onClose }) {
         setError("Digite um telefone válido.");
         return;
       }
+      if (!birthDate) {
+        setError("Informe sua data de nascimento.");
+        return;
+      }
+
+      const age = calculateAge(birthDate);
+
+      if (age < 18 || age > 120) {
+        setError(
+          "A idade derivada da data de nascimento deve estar entre 18 e 120 anos."
+        );
+        return;
+      }
 
       const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.#_-])[A-Za-z\d@$!%*?&.#_-]{8,}$/;
@@ -103,7 +135,7 @@ export function LoginModal({ isOpen, onClose }) {
 
     try {
       if (isRegistering) {
-        await register(cleanName, email, password, phone);
+        await register(cleanName, email, password, phone, birthDate);
       } else {
         await login(email, password);
       }
@@ -121,6 +153,7 @@ export function LoginModal({ isOpen, onClose }) {
     setEmail("");
     setPassword("");
     setConfirmPassword("");
+    setBirthDate("");
   };
 
   if (!isOpen) return null;
@@ -199,7 +232,25 @@ export function LoginModal({ isOpen, onClose }) {
                 />
 
               </div>
+
+              <div className="login-modal-group">
+                <label className="login-modal-label">Data de nascimento</label>
+                <input
+                  type="date"
+                  className="login-modal-input"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  min={new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 120)
+                  ).toISOString().split("T")[0]}
+                  max={new Date(
+                    new Date().setFullYear(new Date().getFullYear() - 18)
+                  ).toISOString().split("T")[0]}
+                />
+              </div>
             </>
+
+
           )}
 
           <button type="submit" className="login-modal-submit">
