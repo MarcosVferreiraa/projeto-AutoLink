@@ -13,7 +13,8 @@ import { ConfirmModal } from '../components/ConfirmModal';
 export function Home() {
   const navigate = useNavigate();
   const { cars, addCar, removeCar } = useCars();
-  const { user, isAdmin } = useAuth();
+  const { user, userProfile, isAdmin } = useAuth();
+  const currentUserId = user?.uid || user?.id;
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -49,7 +50,13 @@ export function Home() {
     try {
       const carWithAuthor = {
         ...newCarData,
-        userId: user.uid || user.id
+        userId: user.uid || user.id,
+        createdByName:
+          userProfile?.name ||
+          user?.displayName ||
+          user?.email ||
+          'Utilizador AutoLink',
+        createdByEmail: user?.email || userProfile?.email || ''
       };
       await addCar(carWithAuthor);
     } catch (error) {
@@ -64,6 +71,12 @@ export function Home() {
     setCarToDelete(null);
     setIsDeleteModalOpen(false);
   };
+
+  const canDeleteCar = (car) =>
+    Boolean(
+      isAdmin ||
+      (currentUserId && String(car?.userId) === String(currentUserId))
+    );
 
   // filtros da Sidebar esquerda
   const filteredCars = cars.filter(car => {
@@ -202,7 +215,7 @@ export function Home() {
                 {sortedAndFilteredCars.map(car => (
                   <div key={car.id} className="relative">
                     <CarCard {...car} />
-                    {isAdmin && (
+                    {canDeleteCar(car) && (
                       <button className="absolute top-3 right-3 w-8 h-8 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-md hover:opacity-90 transition-opacity z-10"
                         onClick={() => {
                           setCarToDelete(car.id);

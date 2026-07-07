@@ -2,6 +2,8 @@ import { X, Upload } from "lucide-react";
 import { useState } from "react";
 import styles from './AddCarModal.module.css';
 
+const MAX_IMAGE_SIZE_BYTES = 600 * 1024;
+
 export function AddCarModal({ isOpen, onClose, onAddCar }) {
   const [formData, setFormData] = useState({
     image: "",
@@ -17,6 +19,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
     features: "",
   });
   const [errors, setErrors] = useState({});
+  const [selectedImageName, setSelectedImageName] = useState("");
 
 
   if (!isOpen) return null;
@@ -26,8 +29,8 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
     const newErrors = {};
 
     if (!formData.image.trim()) {
-      newErrors.image = "Informe a URL da imagem";
-    } else {
+      newErrors.image = "Informe a URL da imagem ou selecione um arquivo";
+    } else if (!formData.image.startsWith("data:image/")) {
       try {
         new URL(formData.image);
       } catch {
@@ -102,6 +105,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
       description: "",
       features: "",
     });
+    setSelectedImageName("");
 
     setErrors({});
 
@@ -126,6 +130,53 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
       ...prev,
       [name]: "",
     }));
+  };
+
+  const handleImageFileChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "Selecione um arquivo de imagem válido",
+      }));
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      setErrors((prev) => ({
+        ...prev,
+        image: "A imagem deve ter no máximo 600 KB",
+      }));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setFormData((prev) => ({
+        ...prev,
+        image: typeof reader.result === "string" ? reader.result : "",
+      }));
+      setSelectedImageName(file.name);
+      setErrors((prev) => ({
+        ...prev,
+        image: "",
+      }));
+    };
+
+    reader.onerror = () => {
+      setErrors((prev) => ({
+        ...prev,
+        image: "Não foi possível ler o arquivo selecionado",
+      }));
+    };
+
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -153,6 +204,21 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
 
                   className={`${styles.addCarModalInput} ${styles.addCarModalImageInput}${errors.image ? styles.inputError : ""}`}
                 />
+              </div>
+              <div className={styles.localImageRow}>
+                <label className={styles.localImageLabel} htmlFor="car-image-upload">
+                  Ou escolher imagem do computador
+                </label>
+                <input
+                  id="car-image-upload"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  onChange={handleImageFileChange}
+                  className={styles.localImageInput}
+                />
+                {selectedImageName && (
+                  <p className={styles.selectedImageName}>Arquivo selecionado: {selectedImageName}</p>
+                )}
               </div>
               {errors.image && (
                 <span className={styles.errorMessage}>

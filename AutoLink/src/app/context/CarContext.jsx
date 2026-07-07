@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import {
   collection,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   deleteDoc,
@@ -32,26 +33,88 @@ export function CarsProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const withTimeout = (promise, timeoutMs = 12000) =>
+      Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout ao carregar carros.')), timeoutMs);
+        })
+      ]);
+
     async function fetchCars() {
       try {
-        setLoading(true);
+        if (isMounted) setLoading(true);
 
-        const querySnapshot = await getDocs(collection(db, 'cars'));
+        const querySnapshot = await withTimeout(getDocs(collection(db, 'cars')));
 
         const carsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
 
-        setCars(carsData);
+        const enrichedCarsData = await Promise.all(
+          carsData.map(async (car) => {
+            if (car?.createdByName || !car?.userId) {
+              return car;
+            }
+
+            try {
+              const userSnapshot = await withTimeout(getDoc(doc(db, 'users', String(car.userId))));
+
+              if (!userSnapshot.exists()) {
+                return car;
+              }
+
+              const userData = userSnapshot.data();
+
+              const resolvedName = userData?.name || userData?.displayName || car?.createdByName || '';
+              const resolvedEmail = userData?.email || car?.createdByEmail || '';
+
+              const backfillPayload = {};
+
+              if (!car?.createdByName && resolvedName) {
+                backfillPayload.createdByName = resolvedName;
+              }
+
+              if (!car?.createdByEmail && resolvedEmail) {
+                backfillPayload.createdByEmail = resolvedEmail;
+              }
+
+              if (Object.keys(backfillPayload).length > 0) {
+                try {
+                  await withTimeout(updateDoc(doc(db, 'cars', String(car.id)), backfillPayload), 8000);
+                } catch (error) {
+                  console.error('Erro ao atualizar criador do carro no Firestore:', error);
+                }
+              }
+
+              return {
+                ...car,
+                createdByName: resolvedName,
+                createdByEmail: resolvedEmail
+              };
+            } catch (error) {
+              console.error('Erro ao carregar anunciante do carro:', error);
+              return car;
+            }
+          })
+        );
+
+        if (isMounted) setCars(enrichedCarsData);
       } catch (error) {
         console.error('Erro ao buscar carros:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     fetchCars();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const getCarById = (id) =>

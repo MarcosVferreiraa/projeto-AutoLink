@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router';
 import { Car, Gauge, Calendar, Fuel } from 'lucide-react';
 import './CarCard.css';
 
-export function CarCard({ id, image, brand, model, year, price, mileage, fuel, transmission, color }) {
+export function CarCard({ id, image, brand, model, year, price, mileage, fuel, transmission, color, createdByName }) {
   const navigate = useNavigate();
   return (
     <div
@@ -22,6 +22,7 @@ export function CarCard({ id, image, brand, model, year, price, mileage, fuel, t
           <div className="car-card-title">
             <h3>{brand} {model}</h3>
             <p className="car-card-meta">{year}</p>
+            <p className="car-card-author">Anunciante: {createdByName || 'Não informado'}</p>
           </div>
 
           <div className="car-card-grid">

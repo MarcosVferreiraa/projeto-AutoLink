@@ -10,6 +10,7 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -25,7 +26,7 @@ import { formatPhoneByThreeDigits } from "../utils/phone";
 
 const AuthContext = createContext(undefined);
 
-const SESSION_DURATION = 60 * 60 * 1000; // 60 min
+const SESSION_DURATION = 5 * 60 * 1000; // 60 min
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -113,6 +114,16 @@ export function AuthProvider({ children }) {
     return userCredential;
   }
 
+  async function resetPassword(email) {
+    const normalizedEmail = (email || "").trim();
+
+    if (!normalizedEmail) {
+      throw new Error("Digite um e-mail para recuperar a senha.");
+    }
+
+    await sendPasswordResetEmail(auth, normalizedEmail);
+  }
+
   async function logout() {
     await signOut(auth);
 
@@ -175,22 +186,29 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      if (firebaseUser) {
-        setUser(firebaseUser);
+      try {
+        if (firebaseUser) {
+          setUser(firebaseUser);
 
-        const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
-        if (userDoc.exists()) {
-          setUserProfile(userDoc.data());
+          if (userDoc.exists()) {
+            setUserProfile(userDoc.data());
+          } else {
+            setUserProfile(null);
+          }
         } else {
+          setUser(null);
           setUserProfile(null);
         }
-      } else {
+
+      } catch (error) {
+        console.error("Erro ao carregar sessão do utilizador:", error);
         setUser(null);
         setUserProfile(null);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return unsubscribe;
@@ -242,6 +260,7 @@ export function AuthProvider({ children }) {
         userProfile,
         login,
         register,
+        resetPassword,
         logout,
         deleteAccount,
         updateProfile,

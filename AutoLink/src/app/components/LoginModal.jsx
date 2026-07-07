@@ -2,17 +2,21 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { auth } from "../../firebase/firebase"; // Verifique este caminho!
+import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import "./LoginModal.css";
 
 export function LoginModal({ isOpen, onClose }) {
-  const { login, register } = useAuth();
+  const { login, register, resetPassword } = useAuth();
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const getFriendlyError = (error) => {
@@ -44,9 +48,12 @@ export function LoginModal({ isOpen, onClose }) {
       await signInWithPopup(auth, provider);
       onClose();
     } catch (err) {
+      setInfo("");
       setError(getFriendlyError(err));
     }
   };
+
+  
 
   const calculateAge = (birthDate) => {
     const today = new Date();
@@ -69,6 +76,7 @@ export function LoginModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setInfo("");
     const cleanName = name.trim();
     if (!email.trim()) {
       setError("Digite o seu e-mail.");
@@ -148,6 +156,7 @@ export function LoginModal({ isOpen, onClose }) {
   const handleToggleMode = () => {
     setIsRegistering((prev) => !prev);
     setError("");
+    setInfo("");
     setName("");
     setPhone("");
     setEmail("");
@@ -167,6 +176,13 @@ export function LoginModal({ isOpen, onClose }) {
         </div>
 
         <form onSubmit={handleSubmit} className="login-modal-form" noValidate>
+          {info && (
+            <div className="login-alert login-alert-info">
+              <AlertCircle size={18} />
+              <span>{info}</span>
+            </div>
+          )}
+
           {error && (
             <div className="login-alert login-alert-error">
               <AlertCircle size={18} />
@@ -180,6 +196,7 @@ export function LoginModal({ isOpen, onClose }) {
               <input
                 type="text"
                 className="login-modal-input"
+                placeholder="Seu nome completo"
                 value={name}
                 onChange={(e) =>
                   setName(e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ""))}
@@ -192,6 +209,7 @@ export function LoginModal({ isOpen, onClose }) {
             <label className="login-modal-label">E-mail</label>
             <input
               type="email" className="login-modal-input"
+              placeholder="nome@exemplo.com"
               value={email} onChange={(e) => setEmail(e.target.value)}
 
             />
@@ -201,6 +219,7 @@ export function LoginModal({ isOpen, onClose }) {
             <label className="login-modal-label">Senha</label>
             <input
               type="password" className="login-modal-input"
+              placeholder="Min. 8 caracteres com maiúscula, minúscula, número e especial"
               value={password} onChange={(e) => setPassword(e.target.value)}
 
             />
@@ -213,6 +232,7 @@ export function LoginModal({ isOpen, onClose }) {
                 <input
                   type="password"
                   className="login-modal-input"
+                  placeholder="Repita a senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
 
@@ -224,6 +244,7 @@ export function LoginModal({ isOpen, onClose }) {
                 <input
                   type="tel"
                   className="login-modal-input"
+                  placeholder="Somente numeros (9 digitos)"
                   value={phone}
                   onChange={(e) =>
                     setPhone(e.target.value.replace(/\D/g, ""))
@@ -238,6 +259,7 @@ export function LoginModal({ isOpen, onClose }) {
                 <input
                   type="date"
                   className="login-modal-input"
+                  placeholder="Selecione sua data de nascimento"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   min={new Date(
@@ -256,6 +278,16 @@ export function LoginModal({ isOpen, onClose }) {
           <button type="submit" className="login-modal-submit">
             {isRegistering ? "Criar Conta" : "Entrar"}
           </button>
+
+          {!isRegistering && (
+            <button
+  type="button"
+  className="login-modal-forgot"
+  onClick={() => setShowForgotPassword(true)}
+>
+  Esqueceu a senha?
+</button>
+          )}
 
           <button
             type="button"
@@ -277,7 +309,13 @@ export function LoginModal({ isOpen, onClose }) {
             </button>
           </div>
         )}
-      </div>
+            </div>
+
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+        resetPassword={resetPassword}
+      />
     </div>
   );
 }

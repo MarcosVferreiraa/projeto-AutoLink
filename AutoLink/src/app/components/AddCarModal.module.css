@@ -91,6 +91,29 @@
   padding-left: 2.6rem;
 }
 
+.localImageRow {
+  margin-top: 0.75rem;
+}
+
+.localImageLabel {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.localImageInput {
+  width: 100%;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.selectedImageName {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  color: #1f2937;
+}
+
 .addCarModalInput:focus,
 .addCarModalSelect:focus,
 .addCarModalTextarea:focus {
