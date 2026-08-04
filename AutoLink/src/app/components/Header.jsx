@@ -122,13 +122,13 @@ export function Header({
 
               <div className="header-contact-item">
                 <Phone className="w-4 h-4 text-muted-foreground" />
-                <span>{formatPhoneByThreeDigits("910214376")}</span>
+                <span>{formatPhoneByThreeDigits("925197009")}</span>
               </div>
 
               <div className="header-contact-item">
                 <Mail className="w-4 h-4 text-muted-foreground" />
                 <span>
-                  contato@autolink.com.br
+                  marcos.ferreira.mv41@outlook.com
                 </span>
               </div>
 

@@ -26,7 +26,7 @@ import { formatPhoneByThreeDigits } from "../utils/phone";
 
 const AuthContext = createContext(undefined);
 
-const SESSION_DURATION = 5 * 60 * 1000; // 60 min
+const SESSION_DURATION = 60 * 60 * 1000; // 60 min
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
