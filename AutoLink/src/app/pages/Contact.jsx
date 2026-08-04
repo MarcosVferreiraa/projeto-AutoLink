@@ -39,21 +39,21 @@ export function Contact() {
             <div className="info-icon-wrapper"><Phone className="w-5 h-5" /></div>
             <div className="info-content">
               <h3>Telefone</h3>
-              <p>{formatPhoneByThreeDigits('910214376')}</p>
+              <p>{formatPhoneByThreeDigits('925197009')}</p>
             </div>
           </div>
           <div className="info-card">
             <div className="info-icon-wrapper"><Mail className="w-5 h-5" /></div>
             <div className="info-content">
               <h3>Email</h3>
-              <p>contato@autolink.com.br</p>
+              <p> marcos.mv41@outlook.com</p>
             </div>
           </div>
           <div className="info-card">
             <div className="info-icon-wrapper"><MapPin className="w-5 h-5" /></div>
             <div className="info-content">
               <h3>Localização</h3>
-              <p>Av. Paulista, 1000 - São Paulo, SP</p>
+              <p>Lisboa, 1000 - Portugal, PT</p>
             </div>
           </div>
           <div className="info-card">

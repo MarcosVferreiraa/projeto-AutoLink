@@ -86,15 +86,15 @@ export function Root() {
                 <li>Segunda a Sexta: 8h - 18h</li>
                 <li>Sábado: 9h - 14h</li>
                 <li>{formatPhoneByThreeDigits("910214376")}</li>
-                <li>contato@autolink.com.br</li>
+                <li> marcos.ferreira.mv41@outlook.com</li>
               </ul>
             </div>
             <div>
               <h4 className="mb-4">Localização</h4>
               <p className="text-muted-foreground">
-                Av. Paulista, 1000<br />
-                São Paulo - SP<br />
-                CEP: 01310-100
+                Lisboa<br />
+                Portugal<br />
+                CEP: 1200-000
               </p>
             </div>
           </div>
