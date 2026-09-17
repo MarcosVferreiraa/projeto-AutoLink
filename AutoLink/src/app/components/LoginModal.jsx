@@ -1,9 +1,7 @@
 ﻿import { X, Shield, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { auth } from "../../firebase/firebase"; // Verifique este caminho!
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import "./LoginModal.css";
 
 export function LoginModal({ isOpen, onClose }) {
@@ -42,15 +40,8 @@ export function LoginModal({ isOpen, onClose }) {
   };
 
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-
-    try {
-      await signInWithPopup(auth, provider);
-      onClose();
-    } catch (err) {
-      setInfo("");
-      setError(getFriendlyError(err));
-    }
+    setInfo("Login com Google estará disponível em uma próxima etapa.");
+    setError("");
   };
 
   

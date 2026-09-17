@@ -5,14 +5,12 @@ import TextField from '@mui/material/TextField';
 import Select from '@mui/material/Select';
 import Alert from '@mui/material/Alert';
 
-import { auth, db } from '../../firebase/firebase';
 import { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { formatPhoneByThreeDigits } from '../utils/phone';
+import { useAuth } from '../context/AuthContext';
 import './Register.css';
 
 export default function Register() {
+  const { register } = useAuth();
   const [form, setForm] = useState({
     name: '',
     email: '', 
@@ -35,29 +33,11 @@ export default function Register() {
     }
     
     try {
-      await register(
-        form.name,
-        form.email,
-        form.password,
-        form.phoneNumber,
-        form.userType
-      );
+      await register(form.name, form.email, form.password, form.phoneNumber, '', form.userType);
     } catch (err) {
       setError(err.code);
     }
   };
-
-  async function register(name, email, password, phoneNumber, userType) {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', cred.user.uid), {
-      uid: cred.user.uid,
-      email,
-      name,
-      phoneNumber: formatPhoneByThreeDigits(phoneNumber),
-      userType
-    });
-    return cred;
-  }
 
   return (
     <div className="register-page-container">

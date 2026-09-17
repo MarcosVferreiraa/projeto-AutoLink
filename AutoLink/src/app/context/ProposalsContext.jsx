@@ -1,42 +1,17 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import { 
-  collection, 
-  query, 
-  onSnapshot, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  addDoc,
-  writeBatch
-} from "firebase/firestore";
-import { db } from "../../firebase/firebase"; 
+import { createContext, useContext, useEffect, useState } from "react";
+import { apiFetch, jsonBody } from "../api";
 import { useCars } from "./CarContext";
-import {
-  getProposalOwnerId,
-  normalizeProposalDraft,
-  normalizeProposalStatus,
-  sortProposalsForReview,
-  validateProposalApproval,
-} from "./proposalsDomain";
+import { getProposalOwnerId, normalizeProposalDraft, normalizeProposalStatus, sortProposalsForReview, validateProposalApproval } from "./proposalsDomain";
 
 const ProposalsContext = createContext(undefined);
-
 const proposalsContextFallback = {
   proposals: [],
-  addProposal: async () => {
-    throw new Error("ProposalsProvider não disponível.");
-  },
-  acceptProposal: async () => {
-    throw new Error("ProposalsProvider não disponível.");
-  },
-  rejectProposal: async () => {
-    throw new Error("ProposalsProvider não disponível.");
-  },
-  cancelProposal: async () => {
-    throw new Error("ProposalsProvider não disponível.");
-  },
+  addProposal: async () => { throw new Error("ProposalsProvider não disponível."); },
+  acceptProposal: async () => { throw new Error("ProposalsProvider não disponível."); },
+  rejectProposal: async () => { throw new Error("ProposalsProvider não disponível."); },
+  cancelProposal: async () => { throw new Error("ProposalsProvider não disponível."); },
   getUserProposals: () => [],
-  canApproveProposal: () => ({ valid: false, reason: "ProposalsProvider não disponível." })
+  canApproveProposal: () => ({ valid: false, reason: "ProposalsProvider não disponível." }),
 };
 
 export const ProposalsProvider = ({ children }) => {
@@ -44,94 +19,37 @@ export const ProposalsProvider = ({ children }) => {
   const { removeCarFromState } = useCars();
 
   useEffect(() => {
-    const q = query(collection(db, "proposals"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const proposalsData = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          status: normalizeProposalStatus(doc.data()?.status)
-        }))
-        .sort(sortProposalsForReview);
-
-      setProposals(proposalsData);
-    });
-    return () => unsubscribe();
+    apiFetch("/proposals")
+      .then((result) => setProposals((result.proposals || []).map((proposal) => ({ ...proposal, status: normalizeProposalStatus(proposal.status) })).sort(sortProposalsForReview)))
+      .catch((error) => console.error("Erro ao carregar propostas:", error));
   }, []);
 
   const addProposal = async (data) => {
-    try {
-      await addDoc(collection(db, "proposals"), normalizeProposalDraft(data));
-    } catch (error) {
-      console.error("Erro ao enviar proposta:", error);
-      throw error;
-    }
+    const result = await apiFetch("/proposals", { method: "POST", body: jsonBody(normalizeProposalDraft(data)) });
+    setProposals((previous) => [{ ...result.proposal, status: "pending" }, ...previous]);
   };
 
   const canApproveProposal = (proposal) => validateProposalApproval(proposal);
+  const updateProposal = async (id, payload) => {
+    const result = await apiFetch(`/proposals/${id}`, { method: "PATCH", body: jsonBody(payload) });
+    setProposals((previous) => previous.map((proposal) => proposal.id === id ? result.proposal : proposal));
+  };
 
   const acceptProposal = async (id, proposal) => {
     const validation = validateProposalApproval(proposal);
-    if (!validation.valid) {
-      throw new Error(validation.reason);
-    }
-
-    const soldCarId = String(proposal?.carId || "").trim();
-
-    if (soldCarId && soldCarId !== "simulador") {
-      const batch = writeBatch(db);
-      batch.update(doc(db, "proposals", id), {
-        status: "approved",
-        reviewedAt: new Date().toISOString()
-      });
-      batch.delete(doc(db, "cars", soldCarId));
-      await batch.commit();
-      removeCarFromState(soldCarId);
-      return;
-    }
-
-    await updateDoc(doc(db, "proposals", id), {
-      status: "approved",
-      reviewedAt: new Date().toISOString()
-    });
+    if (!validation.valid) throw new Error(validation.reason);
+    await updateProposal(id, { status: "approved", reviewedAt: new Date().toISOString() });
+    if (proposal?.carId && proposal.carId !== "simulador") removeCarFromState(String(proposal.carId));
   };
 
-  const rejectProposal = async (id, reason = "") => {
-    await updateDoc(doc(db, "proposals", id), {
-      status: "rejected",
-      rejectionReason: reason,
-      reviewedAt: new Date().toISOString()
-    });
-  };
-
+  const rejectProposal = (id, reason = "") => updateProposal(id, { status: "rejected", rejectionReason: reason, reviewedAt: new Date().toISOString() });
   const cancelProposal = async (id) => {
-    await deleteDoc(doc(db, "proposals", id));
+    await apiFetch(`/proposals/${id}`, { method: "DELETE" });
+    setProposals((previous) => previous.filter((proposal) => proposal.id !== id));
   };
+  const getUserProposals = (userId) => userId ? proposals.filter((proposal) => getProposalOwnerId(proposal) === userId) : [];
 
-  const getUserProposals = (userId) => {
-    if (!userId) return [];
-
-    return proposals.filter((p) => {
-      return getProposalOwnerId(p) === userId;
-    });
-  };
-
-  return (
-    <ProposalsContext.Provider value={{
-      proposals,
-      addProposal,
-      acceptProposal,
-      rejectProposal,
-      cancelProposal,
-      getUserProposals,
-      canApproveProposal
-    }}>
-      {children}
-    </ProposalsContext.Provider>
-  );
+  return <ProposalsContext.Provider value={{ proposals, addProposal, acceptProposal, rejectProposal, cancelProposal, getUserProposals, canApproveProposal }}>{children}</ProposalsContext.Provider>;
 };
 
-export const useProposals = () => {
-  const context = useContext(ProposalsContext);
-  return context || proposalsContextFallback;
-};
+export const useProposals = () => useContext(ProposalsContext) || proposalsContextFallback;

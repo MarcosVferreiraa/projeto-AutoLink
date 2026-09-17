@@ -6,11 +6,13 @@ This is a JavaScript/JSX project for a used car marketplace UI. The original des
 ## Setup
 
 1. Run `npm install` to install dependencies.
-2. Run `npm run dev` to start the Vite development server.
+2. Run `npm run dev:full` to start the frontend and the backend.
 
 ## Scripts
 
 - `npm run dev` — start development server
+- `npm run server` — start the API in `AutoLink.api`
+- `npm run dev:full` — start frontend and API together
 - `npm run build` — build production assets
 
 ## Notes
@@ -18,4 +20,5 @@ This is a JavaScript/JSX project for a used car marketplace UI. The original des
 - The project is now using `.jsx` and `.js` source files.
 - Entry point is `src/main.jsx`.
 - Vite is configured with `vite.config.js`.
+- The backend and SQLite database are located in `AutoLink.api`.
   
