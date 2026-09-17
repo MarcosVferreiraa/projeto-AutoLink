@@ -1,277 +1,121 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-  signOut,
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-  deleteUser,
-} from "firebase/auth";
-
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase/firebase";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { apiFetch, clearToken, getToken, jsonBody } from "../api";
 import { formatPhoneByThreeDigits } from "../utils/phone";
 
-
-
 const AuthContext = createContext(undefined);
-
-const SESSION_DURATION = 60 * 60 * 1000; // 60 min
+const SESSION_DURATION = 60 * 60 * 1000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const mockAdminSessionRef = useRef(false);
-
+  const [loading, setLoading] = useState(() => Boolean(getToken()));
   const [sessionExpired, setSessionExpired] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const sessionTimer = useRef(null);
 
-  const providerIds = user?.providerData?.map((provider) => provider?.providerId) || [];
-
-  const canChangePassword = !mockAdminSessionRef.current && providerIds.includes("password");
+  const saveSession = (session) => {
+    localStorage.setItem("autolink_token", session.token);
+    setUser(session.user);
+    setUserProfile(session.profile || session.user);
+  };
 
   async function login(email, password) {
-    if (email === "admin@stand.com" && password === "123456") {
-      const mockAdminUser = {
-        uid: "admin-fixo-desenvolvimento-123",
-      };
-
-      const mockAdminProfile = {
-        name: "Administrador Geral",
-        email: "admin@stand.com",
-        phone: "912 345 678",
-        role: "admin",
-        approved: true,
-      };
-
-      setUser(mockAdminUser);
-      setUserProfile(mockAdminProfile);
-      mockAdminSessionRef.current = true;
-      setLoading(false);
-
-      return { user: mockAdminUser };
-    }
-
-    return await signInWithEmailAndPassword(auth, email, password);
-  }
-  async function deleteAccount(password) {
-    if (!auth.currentUser) {
-      throw new Error("Utilizador não autenticado.");
-    }
-
-    const currentUser = auth.currentUser;
-
-
-    const credential = EmailAuthProvider.credential(
-      currentUser.email,
-      password
-    );
-
-    await reauthenticateWithCredential(
-      currentUser,
-      credential
-    );
-
-
-    await deleteDoc(doc(db, "users", currentUser.uid));
-
-
-    await deleteUser(currentUser);
-
-    setUser(null);
-    setUserProfile(null);
+    const session = await apiFetch("/auth/login", { method: "POST", body: jsonBody({ email, password }) });
+    saveSession(session);
+    return session;
   }
 
   async function register(name, email, password, phone, birthDate, role = "user") {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-
-    await setDoc(doc(db, "users", userCredential.user.uid), {
-      uid: userCredential.user.uid,
-      name,
-      email,
-      phone: formatPhoneByThreeDigits(phone),
-      role,
-      birthDate,
-      approved: false,
-      createdAt: new Date(),
+    const session = await apiFetch("/auth/register", {
+      method: "POST",
+      body: jsonBody({ name, email, password, phone: formatPhoneByThreeDigits(phone), birthDate, role }),
     });
-
-    return userCredential;
-  }
-
-  async function resetPassword(email) {
-    const normalizedEmail = (email || "").trim();
-
-    if (!normalizedEmail) {
-      throw new Error("Digite um e-mail para recuperar a senha.");
-    }
-
-    await sendPasswordResetEmail(auth, normalizedEmail);
+    saveSession(session);
+    return session;
   }
 
   async function logout() {
-    await signOut(auth);
-
+    await apiFetch("/auth/logout", { method: "POST" }).catch(() => {});
+    clearToken();
     setUser(null);
     setUserProfile(null);
-    mockAdminSessionRef.current = false;
-
     setSessionExpired(false);
     setCountdown(3);
   }
 
+  async function resetPassword(email) {
+    const normalizedEmail = String(email || "").trim();
+    if (!normalizedEmail) throw new Error("Digite um e-mail para recuperar a senha.");
+    await apiFetch("/auth/forgot-password", { method: "POST", body: jsonBody({ email: normalizedEmail }) });
+  }
+
   async function updateProfile(profileData) {
-    if (!user) {
-      throw new Error("Utilizador não autenticado.");
-    }
-
-    const payload = {
-      name: (profileData?.name || "").trim(),
-      phone: formatPhoneByThreeDigits(profileData?.phone || ""),
-    };
-
-    if (mockAdminSessionRef.current) {
-      setUserProfile((prev) => ({
-        ...(prev || {}),
-        ...payload,
-      }));
-      return;
-    }
-
-    await updateDoc(doc(db, "users", user.uid), payload);
-
-    setUserProfile((prev) => ({
-      ...(prev || {}),
-      ...payload,
-    }));
+    const result = await apiFetch("/users/me", {
+      method: "PATCH",
+      body: jsonBody({ name: String(profileData?.name || "").trim(), phone: formatPhoneByThreeDigits(profileData?.phone || "") }),
+    });
+    setUserProfile(result.profile);
   }
 
   async function changePassword(currentPassword, newPassword) {
-    if (mockAdminSessionRef.current) {
-      throw new Error("Alteração de senha não disponível para o admin fixo de desenvolvimento.");
-    }
+    await apiFetch("/users/me/password", { method: "PATCH", body: jsonBody({ currentPassword, newPassword }) });
+  }
 
-    if (!auth.currentUser || !auth.currentUser.email) {
-      throw new Error("Utilizador não autenticado para alteração de senha.");
-    }
-
-    const credential = EmailAuthProvider.credential(
-      auth.currentUser.email,
-      currentPassword
-    );
-
-    await reauthenticateWithCredential(auth.currentUser, credential);
-    await updatePassword(auth.currentUser, newPassword);
+  async function deleteAccount(password) {
+    await apiFetch("/users/me", { method: "DELETE", headers: { "X-Delete-Password": password } });
+    clearToken();
+    setUser(null);
+    setUserProfile(null);
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (mockAdminSessionRef.current) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        if (firebaseUser) {
-          setUser(firebaseUser);
-
-          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
-
-          if (userDoc.exists()) {
-            setUserProfile(userDoc.data());
-          } else {
-            setUserProfile(null);
-          }
-        } else {
-          setUser(null);
-          setUserProfile(null);
-        }
-
-      } catch (error) {
-        console.error("Erro ao carregar sessão do utilizador:", error);
-        setUser(null);
-        setUserProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    });
-
-    return unsubscribe;
+    if (!getToken()) {
+      return undefined;
+    }
+    apiFetch("/auth/me")
+      .then((session) => {
+        setUser(session.user);
+        setUserProfile(session.profile || session.user);
+      })
+      .catch(() => clearToken())
+      .finally(() => setLoading(false));
+    return undefined;
   }, []);
 
   useEffect(() => {
-    if (!user) return;
-
-    let interval;
-
-    const timeout = setTimeout(() => {
+    if (!user) return undefined;
+    sessionTimer.current = setTimeout(() => {
       setSessionExpired(true);
-
       let seconds = 3;
-
-      interval = setInterval(async () => {
-        seconds--;
-
+      const interval = setInterval(() => {
+        seconds -= 1;
         setCountdown(seconds);
-
         if (seconds <= 0) {
           clearInterval(interval);
-
-          setSessionExpired(false);
-
-          await signOut(auth);
-
-          setUser(null);
-          setUserProfile(null);
-
-          setCountdown(3);
+          logout();
         }
       }, 1000);
     }, SESSION_DURATION);
-
-    return () => {
-      clearTimeout(timeout);
-
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
+    return () => clearTimeout(sessionTimer.current);
   }, [user]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        userProfile,
-        login,
-        register,
-        resetPassword,
-        logout,
-        deleteAccount,
-        updateProfile,
-        changePassword,
-        canChangePassword,
-        loading,
-        isAdmin: userProfile?.role === "admin",
-        sessionExpired,
-        countdown,
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      userProfile,
+      login,
+      register,
+      resetPassword,
+      logout,
+      deleteAccount,
+      updateProfile,
+      changePassword,
+      canChangePassword: Boolean(user),
+      loading,
+      isAdmin: userProfile?.role === "admin",
+      sessionExpired,
+      countdown,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -279,10 +123,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-
-  if (context === undefined) {
-    throw new Error("useAuth deve ser usado dentro de AuthProvider");
-  }
-
+  if (context === undefined) throw new Error("useAuth deve ser usado dentro de AuthProvider");
   return context;
 }

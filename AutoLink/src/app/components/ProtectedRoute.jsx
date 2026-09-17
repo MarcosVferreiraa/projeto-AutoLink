@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
 
-  // Impede que o utilizador seja redirecionado por engano enquanto o Firebase carrega
+  // Impede que o utilizador seja redirecionado por engano enquanto a sessão carrega
   if (loading) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>A carregar sessão...</div>;
   }

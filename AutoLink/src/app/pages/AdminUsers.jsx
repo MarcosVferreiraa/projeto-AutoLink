@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ShieldAlert, Trash2, Users, Mail, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { apiFetch, jsonBody } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './AdminUsers.css';
@@ -64,6 +63,19 @@ export function AdminUsers() {
 
     return matchesName && matchesRole && matchesAge;
   });
+  async function fetchUsers() {
+    try {
+      setIsLoadingUsers(true);
+      const result = await apiFetch('/users');
+      setUsersList(result.users || []);
+    } catch (error) {
+      console.error('Erro ao carregar utilizadores:', error);
+      alert('Não foi possível carregar os utilizadores.');
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }
+
   useEffect(() => {
     if (!user || !isAdmin) {
       navigate('/');
@@ -72,21 +84,6 @@ export function AdminUsers() {
 
     fetchUsers();
   }, [user, isAdmin, navigate]);
-
-
-
-  const fetchUsers = async () => {
-    try {
-      setIsLoadingUsers(true);
-      const snapshot = await getDocs(collection(db, 'users'));
-      setUsersList(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (error) {
-      console.error('Erro ao carregar utilizadores:', error);
-      alert('Não foi possível carregar os utilizadores.');
-    } finally {
-      setIsLoadingUsers(false);
-    }
-  };
 
   const handleToggleAdmin = async (account) => {
     const isSelf = account.uid === user?.uid || account.id === user?.uid;
@@ -99,7 +96,10 @@ export function AdminUsers() {
 
     try {
       setProcessingUserId(account.id);
-      await updateDoc(doc(db, 'users', account.id), { role: newRole });
+      await apiFetch(`/users/${account.id}/role`, {
+        method: 'PATCH',
+        body: jsonBody({ role: newRole })
+      });
       setUsersList(prev => prev.map(u => u.id === account.id ? { ...u, role: newRole } : u));
     } catch (error) {
       console.error('Erro ao atualizar papel do utilizador:', error);
@@ -118,7 +118,7 @@ export function AdminUsers() {
     if (window.confirm(`Apagar ${email}?`)) {
       try {
         setProcessingUserId(id);
-        await deleteDoc(doc(db, 'users', id));
+        await apiFetch(`/users/${id}`, { method: 'DELETE' });
         setUsersList(prev => prev.filter(u => u.id !== id));
       } catch (error) {
         console.error('Erro ao apagar utilizador:', error);

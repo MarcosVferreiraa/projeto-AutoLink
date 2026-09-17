@@ -1,12 +1,10 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Heart, Calculator, Edit, Trash2, Send, Calendar, Gauge, Fuel, Zap, Palette } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
 import { useCars } from '../context/CarContext';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useProposals } from '../context/ProposalsContext';
-import { db } from '../../firebase/firebase';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './CarDetails.css';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -30,8 +28,6 @@ export function CarDetails() {
   const car = cars?.find(c => String(c.id) === String(id));
 
   useEffect(() => {
-    let isMounted = true;
-
     const loadOwnerInfo = async () => {
       if (!car?.userId) {
         setOwnerInfo({
@@ -43,39 +39,16 @@ export function CarDetails() {
 
       setIsOwnerLoading(true);
 
-      try {
-        const userSnapshot = await getDoc(doc(db, 'users', car.userId));
-        if (!isMounted) return;
-
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.data();
-          setOwnerInfo({
-            name: userData?.name || userData?.displayName || 'Anunciante',
-            phone: formatPhoneByThreeDigits(userData?.phone || userData?.phoneNumber || '') || 'Não informado',
-          });
-        } else {
-          setOwnerInfo({
-            name: 'Anunciante não encontrado',
-            phone: 'Não informado',
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do anunciante:', error);
-        if (!isMounted) return;
-        setOwnerInfo({
-          name: 'Anunciante indisponível',
-          phone: 'Não informado',
-        });
-      } finally {
-        if (isMounted) setIsOwnerLoading(false);
-      }
+      setOwnerInfo({
+        name: car.createdByName || 'Anunciante não identificado',
+        phone: formatPhoneByThreeDigits(car.createdByPhone || '') || 'Não informado',
+      });
+      setIsOwnerLoading(false);
     };
 
     loadOwnerInfo();
 
-    return () => {
-      isMounted = false;
-    };
+    return undefined;
   }, [car?.userId]);
 
   if (loading) return <div className="car-details-container">Carregando...</div>;
