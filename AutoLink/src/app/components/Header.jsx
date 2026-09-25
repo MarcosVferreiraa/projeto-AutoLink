@@ -18,7 +18,6 @@ import "./Header.css";
 export function Header({
   onLoginClick,
   onProfileClick,
-  onOpenAddCar,
 }) {
   const {
     user,

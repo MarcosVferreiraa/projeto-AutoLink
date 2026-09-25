@@ -196,7 +196,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
               <div className={styles.addCarModalGroup}>
                 <Upload className={styles.inputIcon} size={18} />
                 <input
-                  type="url"
+                  type="text"
                   name="image"
                   value={formData.image}
                   onChange={handleChange}

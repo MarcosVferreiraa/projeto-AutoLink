@@ -9,7 +9,6 @@ import {
   Car,
   LogOut,
   Shield,
-  Trash2,
   CheckCircle,
   AlertCircle
 } from "lucide-react";
@@ -46,8 +45,6 @@ export function ProfileModal({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [passwordSaveMessage, setPasswordSaveMessage] = useState("");
-  const [deletePassword, setDeletePassword] = useState("");
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [showDeleteModal, setShowDeleteModal] =
     useState(false);
 
@@ -77,37 +74,6 @@ export function ProfileModal({
 
   const userProposals =
     getUserProposals?.(user.uid || user.id) || [];
-
-  const handleDeleteAccount = async () => {
-    if (!deletePassword) {
-      alert("Digite a sua senha para confirmar.");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Tem certeza que deseja apagar permanentemente a sua conta?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setIsDeletingAccount(true);
-
-      await deleteAccount(deletePassword);
-
-      onClose();
-    } catch (error) {
-      console.error(error);
-
-      if (error.code === "auth/wrong-password") {
-        alert("Senha incorreta.");
-      } else {
-        alert("Não foi possível apagar a conta.");
-      }
-    } finally {
-      setIsDeletingAccount(false);
-    }
-  };
 
   const handleLogout = async () => {
     try {

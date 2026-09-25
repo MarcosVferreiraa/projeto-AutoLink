@@ -9,6 +9,8 @@ import { formatPhoneByThreeDigits } from '../utils/phone';
 import './CarDetails.css';
 import { ConfirmModal } from '../components/ConfirmModal';
 
+const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'%3E%3Crect width='640' height='360' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-family='Arial,sans-serif' font-size='28'%3EImagem indisponivel%3C/text%3E%3C/svg%3E";
+
 export function CarDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export function CarDetails() {
     loadOwnerInfo();
 
     return undefined;
-  }, [car?.userId]);
+  }, [car?.userId, car?.createdByName, car?.createdByPhone]);
 
   if (loading) return <div className="car-details-container">Carregando...</div>;
   if (!car) return <div className="car-details-container">Veículo não encontrado.</div>;
@@ -118,7 +120,15 @@ export function CarDetails() {
 
       <div className="car-details-layout">
         <div className="car-main-content">
-          <img src={car.image} alt={car.model} className="car-main-image" />
+          <img
+            src={car.image || FALLBACK_IMAGE}
+            alt={car.model}
+            className="car-main-image"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = FALLBACK_IMAGE;
+            }}
+          />
           <h1>{car.brand} {car.model}</h1>
           <div className="car-price-value">R$ {Number(car.price).toLocaleString('pt-BR')}</div>
 

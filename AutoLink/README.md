@@ -21,4 +21,26 @@ This is a JavaScript/JSX project for a used car marketplace UI. The original des
 - Entry point is `src/main.jsx`.
 - Vite is configured with `vite.config.js`.
 - The backend and SQLite database are located in `AutoLink.api`.
+
+### MongoDB
+
+The API uses MongoDB Atlas. Create `AutoLink.api/.env` locally with:
+
+```env
+MONGODB_URI=mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/autolink?appName=TechOf
+MONGODB_DATABASE=autolink
+JWT_SECRET=change-this-secret
+API_PORT=3001
+```
+
+The Atlas user must have access to the `autolink` database and the development machine IP must be allowed in **Network Access**.
+
+### API structure
+
+- `AutoLink.api/index.js` — entrypoint and route registration
+- `AutoLink.api/config.js` — port, JWT and database configuration
+- `AutoLink.api/database.js` — MongoDB connection, indexes and development seed
+- `AutoLink.api/middleware/auth.js` — JWT and administrator protection
+- `AutoLink.api/routes/` — routes for auth, users, cars, favorites and proposals
+- `AutoLink.api/utils.js` — shared IDs, tokens and response formatting
   

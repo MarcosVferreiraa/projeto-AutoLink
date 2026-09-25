@@ -29,7 +29,7 @@ export function ForgotPasswordModal({
       setInfo(
         "Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha."
       );
-    } catch (err) {
+    } catch {
       setError("Não foi possível enviar o e-mail de recuperação.");
     }
   };
