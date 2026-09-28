@@ -1,26 +1,20 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "AutoLink.api/index.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "AutoLink.api/index.js": {
+      "runtime": "nodejs22.x"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "AutoLink.api/index.js"
+      "source": "/api/:path*",
+      "destination": "/AutoLink.api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/:path*",
+      "destination": "/index.html"
     }
   ]
 }

@@ -33,28 +33,63 @@ app.use('/api/proposals', proposalsRoutes);
 
 app.use(errorHandler);
 
-async function startServer() {
-  try {
-    await connectDatabase();
-    await seedDevelopmentAdmin();
+let databaseReady = false;
+let databasePromise = null;
 
-    app.listen(config.port, () => {
-      console.log(
-        `🚗 API AutoLink disponível em http://localhost:${config.port}`
+async function ensureDatabase() {
+  if (databaseReady) {
+    return;
+  }
+
+  if (!databasePromise) {
+    databasePromise = connectDatabase()
+      .then(() => seedDevelopmentAdmin())
+      .then(() => {
+        databaseReady = true;
+      })
+      .catch((error) => {
+        databasePromise = null;
+        throw error;
+      });
+  }
+
+  await databasePromise;
+}
+
+// Inicialização local
+if (process.env.NODE_ENV !== 'production') {
+  ensureDatabase()
+    .then(() => {
+      app.listen(config.port, () => {
+        console.log(
+          `🚗 API AutoLink disponível em http://localhost:${config.port}`
+        );
+      });
+    })
+    .catch((error) => {
+      console.error(
+        'Não foi possível conectar ao MongoDB:',
+        error.message
       );
+
+      process.exitCode = 1;
     });
+}
+
+// Inicialização para Vercel
+app.use(async (req, res, next) => {
+  try {
+    await ensureDatabase();
+    next();
   } catch (error) {
     console.error(
       'Não foi possível conectar ao MongoDB:',
       error.message
     );
 
-    process.exitCode = 1;
+    next(error);
   }
-}
-
-if (process.env.NODE_ENV !== 'production') {
-  startServer();
-}
+});
 
 export default app;
+
