@@ -7,7 +7,7 @@ import { LoginModal } from '../components/LoginModal';
 import { useCars } from '../context/CarContext'
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2 } from 'lucide-react';
-import "./Home.css";
+import "./home.css";
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export function Home() {
