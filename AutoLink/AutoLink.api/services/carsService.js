@@ -1,4 +1,4 @@
-import { cars, users } from '../database.js';
+import { getCollections } from '../database.js';
 import { readPayload } from '../utils.js';
 
 const DEFAULT_PAGE = 1;
@@ -25,6 +25,7 @@ function getOptionalNumber(value) {
   }
 
   const number = Number(text);
+
   return Number.isFinite(number) ? number : undefined;
 }
 
@@ -74,12 +75,16 @@ function getCarFilters(query) {
 
 function matchesCar(car, filters) {
   const payload = car.payload || {};
+
   const brand = String(payload.brand || '').toLowerCase();
   const model = String(payload.model || '').toLowerCase();
   const fuel = String(payload.fuel || '').toLowerCase();
-  const transmission = String(payload.transmission || '').toLowerCase();
+  const transmission = String(
+    payload.transmission || ''
+  ).toLowerCase();
   const color = String(payload.color || '').toLowerCase();
   const city = String(payload.city || '').toLowerCase();
+
   const price = Number(payload.price || 0);
   const year = Number(payload.year || 0);
 
@@ -94,17 +99,24 @@ function matchesCar(car, filters) {
     (!filters.brand || brand === filters.brand) &&
     (!filters.model || model === filters.model) &&
     (!filters.fuel || fuel === filters.fuel) &&
-    (!filters.transmission || transmission === filters.transmission) &&
+    (!filters.transmission ||
+      transmission === filters.transmission) &&
     (!filters.color || color === filters.color) &&
     (!filters.city || city === filters.city) &&
-    (filters.minPrice === undefined || price >= filters.minPrice) &&
-    (filters.maxPrice === undefined || price <= filters.maxPrice) &&
-    (filters.minYear === undefined || year >= filters.minYear) &&
-    (filters.maxYear === undefined || year <= filters.maxYear)
+    (filters.minPrice === undefined ||
+      price >= filters.minPrice) &&
+    (filters.maxPrice === undefined ||
+      price <= filters.maxPrice) &&
+    (filters.minYear === undefined ||
+      year >= filters.minYear) &&
+    (filters.maxYear === undefined ||
+      year <= filters.maxYear)
   );
 }
 
 async function toPublicCar(car) {
+  const { users } = getCollections();
+
   const owner = await users.findOne({
     id: car.created_by,
   });
@@ -118,22 +130,29 @@ async function toPublicCar(car) {
 }
 
 export async function listCars(query = {}) {
+  const { cars } = getCollections();
+
   const pagination = getPagination(query);
   const filters = getCarFilters(query);
+
   const allCars = await cars
     .find({})
     .sort({ created_at: -1 })
     .toArray();
+
   const filteredCars = allCars.filter((car) =>
     matchesCar(car, filters)
   );
+
   const paginatedCars = filteredCars.slice(
     pagination.skip,
     pagination.skip + pagination.limit
   );
+
   const publicCars = await Promise.all(
     paginatedCars.map(toPublicCar)
   );
+
   const total = filteredCars.length;
 
   return {
@@ -146,7 +165,8 @@ export async function listCars(query = {}) {
         1,
         Math.ceil(total / pagination.limit)
       ),
-      hasNext: pagination.page * pagination.limit < total,
+      hasNext:
+        pagination.page * pagination.limit < total,
       hasPrev: pagination.page > 1,
     },
   };

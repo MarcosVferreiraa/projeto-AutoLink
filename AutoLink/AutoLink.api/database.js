@@ -81,3 +81,15 @@ export async function seedDevelopmentAdmin() {
     }
   );
 }
+export function getCollections() {
+  if (!users || !cars || !favorites || !proposals) {
+    throw new Error('Banco de dados ainda não foi inicializado.');
+  }
+
+  return {
+    users,
+    cars,
+    favorites,
+    proposals,
+  };
+}
