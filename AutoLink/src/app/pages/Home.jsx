@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { FilterSidebar } from '../components/FilterSidebar';
 import { CarCard } from '../components/CarCard';
@@ -12,13 +12,14 @@ import { ConfirmModal } from '../components/ConfirmModal';
 
 export function Home() {
   const navigate = useNavigate();
-  const { cars, addCar, removeCar } = useCars();
+  const { cars, addCar, removeCar, fetchCars, pagination } = useCars();
   const { user, userProfile, isAdmin } = useAuth();
   const currentUserId = user?.uid || user?.id;
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [carToDelete, setCarToDelete] = useState(null);
+  const [page, setPage] = useState(1);
 
   // Estado para os filtros da Sidebar lateral esquerda
   const [filters, setFilters] = useState({
@@ -34,6 +35,29 @@ export function Home() {
 
   // ESTADO DO FILTRO DA DIREITA: Guarda o critério de ordenação selecionado
   const [sortCriterion, setSortCriterion] = useState('');
+
+  const handleFilterChange = (updater) => {
+    setPage(1);
+    setFilters((previous) => {
+      const nextValue = typeof updater === 'function' ? updater(previous) : updater;
+      return nextValue;
+    });
+  };
+
+  useEffect(() => {
+    fetchCars({
+      page,
+      limit: 12,
+      q: filters.search || undefined,
+      brand: filters.brand || undefined,
+      minPrice: filters.minPrice || undefined,
+      maxPrice: filters.maxPrice || undefined,
+      minYear: filters.minYear || undefined,
+      maxYear: filters.maxYear || undefined,
+      fuel: filters.fuel || undefined,
+      transmission: filters.transmission || undefined,
+    }).catch((error) => console.error('Erro ao carregar carros paginados:', error));
+  }, [fetchCars, page, filters.search, filters.brand, filters.minPrice, filters.maxPrice, filters.minYear, filters.maxYear, filters.fuel, filters.transmission]);
 
   // Função para abrir o modal com verificação de segurança
   const handleOpenAddModal = () => {
@@ -78,29 +102,8 @@ export function Home() {
       (currentUserId && String(car?.userId) === String(currentUserId))
     );
 
-  // filtros da Sidebar esquerda
-  const filteredCars = cars.filter(car => {
-    const matchesSearch = filters.search === '' ||
-      (car.brand && car.brand.toLowerCase().includes(filters.search.toLowerCase())) ||
-      (car.model && car.model.toLowerCase().includes(filters.search.toLowerCase()));
-
-    const matchesBrand = filters.brand === '' || car.brand === filters.brand;
-
-    const matchesMinPrice = filters.minPrice === '' || Number(car.price) >= Number(filters.minPrice);
-    const matchesMaxPrice = filters.maxPrice === '' || Number(car.price) <= Number(filters.maxPrice);
-
-    const matchesMinYear = filters.minYear === '' || Number(car.year) >= Number(filters.minYear);
-    const matchesMaxYear = filters.maxYear === '' || Number(car.year) <= Number(filters.maxYear);
-
-    const matchesFuel = filters.fuel === '' || car.fuel === filters.fuel;
-    const matchesTransmission = filters.transmission === '' || car.transmission === filters.transmission;
-
-    return matchesSearch && matchesBrand && matchesMinPrice && matchesMaxPrice &&
-      matchesMinYear && matchesMaxYear && matchesFuel && matchesTransmission;
-  });
-
-  // ordenação do filtro da direita nos carros filtrados
-  const sortedAndFilteredCars = [...filteredCars].sort((a, b) => {
+  // ordenação do filtro da direita nos carros recebidos da API
+  const sortedAndFilteredCars = [...cars].sort((a, b) => {
     if (sortCriterion === 'Preço (menor)') {
       return Number(a.price) - Number(b.price);
     }
@@ -183,7 +186,7 @@ export function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <aside className="lg:col-span-1">
-            <FilterSidebar onFilterChange={setFilters} />
+            <FilterSidebar onFilterChange={handleFilterChange} />
           </aside>
 
           <main className="lg:col-span-3">
@@ -191,7 +194,7 @@ export function Home() {
               <div>
                 <h2>Carros Disponíveis</h2>
                 <p className="text-muted-foreground">
-                  {sortedAndFilteredCars.length} {sortedAndFilteredCars.length === 1 ? 'veículo encontrado' : 'veículos encontrados'}
+                  {pagination.total || sortedAndFilteredCars.length} {(pagination.total || sortedAndFilteredCars.length) === 1 ? 'veículo encontrado' : 'veículos encontrados'}
                 </p>
               </div>
 
@@ -234,6 +237,30 @@ export function Home() {
                 <p className="text-muted-foreground">
                   Tente ajustar os filtros para ver mais resultados
                 </p>
+              </div>
+            )}
+
+            {pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center gap-3 mt-8">
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={!pagination.hasPrev}
+                  className="px-4 py-2 rounded-lg border border-border disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+                <span className="text-sm text-muted-foreground">
+                  Página {pagination.page} de {pagination.totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => current + 1)}
+                  disabled={!pagination.hasNext}
+                  className="px-4 py-2 rounded-lg border border-border disabled:opacity-50"
+                >
+                  Próxima
+                </button>
               </div>
             )}
           </main>

@@ -1,6 +1,6 @@
 
 import { Router } from 'express';
-import { cars, users } from '../database.js';
+import { cars } from '../database.js';
 import { AppError } from '../errors.js';
 import {
   authRequired,
@@ -12,36 +12,20 @@ import {
   readPayload,
 } from '../utils.js';
 import { validateCarPayload } from '../validation.js';
+import { listCars } from '../services/carsService.js';
 
 const router = Router();
 
 /*
  * Listar carros
  */
-router.get('/', async (_req, res) => {
-  const carRows = await cars
-    .find()
-    .sort({ created_at: -1 })
-    .toArray();
-
-  const carList = await Promise.all(
-    carRows.map(async (car) => {
-      const user = await users.findOne({
-        id: car.created_by,
-      });
-
-      return {
-        ...readPayload(car),
-        userId: car.created_by,
-        createdByName: user?.name || '',
-        createdByEmail: user?.email || '',
-      };
-    })
-  );
-
-  res.json({
-    cars: carList,
-  });
+router.get('/', async (req, res, next) => {
+  try {
+    const result = await listCars(req.query);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
 });
 
 /*

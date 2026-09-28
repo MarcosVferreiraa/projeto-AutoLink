@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { apiFetch, jsonBody } from "../api";
+import { apiFetch, getToken, jsonBody } from "../api";
+import { useAuth } from "./AuthContext";
 import { useCars } from "./CarContext";
 import { getProposalOwnerId, normalizeProposalDraft, normalizeProposalStatus, sortProposalsForReview, validateProposalApproval } from "./proposalsDomain";
 
@@ -16,13 +17,33 @@ const proposalsContextFallback = {
 
 export const ProposalsProvider = ({ children }) => {
   const [proposals, setProposals] = useState([]);
+  const { user, loading } = useAuth();
   const { removeCarFromState } = useCars();
 
   useEffect(() => {
+    if (loading) return;
+    if (!getToken()) {
+      setProposals([]);
+      return;
+    }
+
     apiFetch("/proposals")
-      .then((result) => setProposals((result.proposals || []).map((proposal) => ({ ...proposal, status: normalizeProposalStatus(proposal.status) })).sort(sortProposalsForReview)))
+      .then((result) => setProposals((result.proposals || []).map((proposal) => {
+        const normalized = normalizeProposalDraft({
+          ...proposal,
+          price: proposal.price ?? proposal.value ?? 0,
+          originalPrice: proposal.originalPrice ?? proposal.carPrice ?? proposal.price ?? proposal.value ?? 0,
+          buyerEmail: proposal.buyerEmail || proposal.createdByEmail || proposal.email || "",
+          status: proposal.status,
+        });
+
+        return {
+          ...normalized,
+          status: normalizeProposalStatus(normalized.status),
+        };
+      }).sort(sortProposalsForReview)))
       .catch((error) => console.error("Erro ao carregar propostas:", error));
-  }, []);
+  }, [loading, user]);
 
   const addProposal = async (data) => {
     const result = await apiFetch("/proposals", { method: "POST", body: jsonBody(normalizeProposalDraft(data)) });

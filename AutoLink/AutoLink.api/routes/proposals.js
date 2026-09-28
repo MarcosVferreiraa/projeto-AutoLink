@@ -1,17 +1,12 @@
 
 import { Router } from 'express';
-import { cars, proposals } from '../database.js';
-import { AppError } from '../errors.js';
+import { authRequired } from '../middleware/auth.js';
 import {
-  authRequired,
-  requireOwnerOrAdmin,
-} from '../middleware/auth.js';
-import {
-  createId,
-  now,
-  readPayload,
-} from '../utils.js';
-import { validateProposalPayload } from '../validation.js';
+  createProposal,
+  deleteProposal,
+  listProposals,
+  updateProposal,
+} from '../services/proposalsService.js';
 
 const router = Router();
 
@@ -25,21 +20,7 @@ router.use(authRequired);
  */
 router.get('/', async (req, res, next) => {
   try {
-    const query =
-      req.authUser.role === 'admin'
-        ? {}
-        : {
-            'payload.userId': req.authUser.id,
-          };
-
-    const proposalsList = await proposals
-      .find(query)
-      .sort({ created_at: -1 })
-      .toArray();
-
-    res.json({
-      proposals: proposalsList.map(readPayload),
-    });
+    res.json(await listProposals(req.authUser));
   } catch (error) {
     next(error);
   }
@@ -50,31 +31,11 @@ router.get('/', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
   try {
-    const payload = validateProposalPayload(req.body);
-    const proposalId = createId();
-
-    const proposal = {
-      ...payload,
-      userId: req.authUser.id,
-      ownerId: req.authUser.id,
-    };
-
-    const status = 'pending';
-
-    await proposals.insertOne({
-      id: proposalId,
-      payload: proposal,
-      status,
-      created_at: now(),
-    });
-
-    res.status(201).json({
-      proposal: {
-        id: proposalId,
-        ...proposal,
-        status,
-      },
-    });
+    const result = await createProposal(
+      req.authUser,
+      req.body
+    );
+    res.status(201).json(result);
   } catch (error) {
     next(error);
   }
@@ -85,85 +46,7 @@ router.post('/', async (req, res, next) => {
  */
 router.patch('/:id', async (req, res, next) => {
   try {
-    const proposalId = req.params.id;
-
-    const existingProposal = await proposals.findOne({
-      id: proposalId,
-    });
-
-    if (!existingProposal) {
-      throw new AppError(
-        404,
-        'proposals/not-found',
-        'Proposta não encontrada.'
-      );
-    }
-
-    const ownerId =
-      existingProposal.payload?.userId ||
-      existingProposal.payload?.ownerId ||
-      req.authUser.id;
-
-    const isAllowed = requireOwnerOrAdmin(
-      req,
-      ownerId
-    );
-
-    if (!isAllowed) {
-      throw new AppError(
-        403,
-        'proposals/forbidden',
-        'Você não pode alterar esta proposta.'
-      );
-    }
-
-    const currentPayload =
-      existingProposal.payload || {};
-
-    const updatedPayload = {
-      ...currentPayload,
-      ...validateProposalPayload({
-        ...currentPayload,
-        ...(req.body || {}),
-      }),
-    };
-
-    const status =
-      updatedPayload.status ||
-      existingProposal.status;
-
-    await proposals.updateOne(
-      { id: proposalId },
-      {
-        $set: {
-          payload: updatedPayload,
-          status,
-        },
-      }
-    );
-
-    /*
-     * Se a proposta for aprovada,
-     * remove o carro do estoque.
-     */
-    const shouldRemoveCar =
-      status === 'approved' &&
-      updatedPayload.carId &&
-      updatedPayload.carId !== 'simulador';
-
-    if (shouldRemoveCar) {
-      await cars.deleteOne({
-        id: String(updatedPayload.carId),
-      });
-    }
-
-    res.json({
-      proposal: {
-        id: proposalId,
-        ...updatedPayload,
-        status,
-      },
-    });
+    res.json(await updateProposal(req));
   } catch (error) {
     next(error);
   }
@@ -174,42 +57,7 @@ router.patch('/:id', async (req, res, next) => {
  */
 router.delete('/:id', async (req, res, next) => {
   try {
-    const proposalId = req.params.id;
-
-    const existingProposal = await proposals.findOne({
-      id: proposalId,
-    });
-
-    if (!existingProposal) {
-      throw new AppError(
-        404,
-        'proposals/not-found',
-        'Proposta não encontrada.'
-      );
-    }
-
-    const ownerId =
-      existingProposal.payload?.userId ||
-      existingProposal.payload?.ownerId ||
-      req.authUser.id;
-
-    const isAllowed = requireOwnerOrAdmin(
-      req,
-      ownerId
-    );
-
-    if (!isAllowed) {
-      throw new AppError(
-        403,
-        'proposals/forbidden',
-        'Você não pode excluir esta proposta.'
-      );
-    }
-
-    await proposals.deleteOne({
-      id: proposalId,
-    });
-
+    await deleteProposal(req);
     res.status(204).end();
   } catch (error) {
     next(error);

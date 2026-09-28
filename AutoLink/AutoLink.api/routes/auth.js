@@ -1,18 +1,11 @@
 
-import bcrypt from 'bcryptjs';
 import { Router } from 'express';
-import { users } from '../database.js';
-import { AppError } from '../errors.js';
 import { authRequired } from '../middleware/auth.js';
 import {
-  createId,
-  createToken,
-  toPublicUser,
-} from '../utils.js';
-import {
-  validateLogin,
-  validateUserRegistration,
-} from '../validation.js';
+  getCurrentUser,
+  loginUser,
+  registerUser,
+} from '../services/authService.js';
 
 const router = Router();
 
@@ -21,49 +14,8 @@ const router = Router();
  */
 router.post('/register', async (req, res, next) => {
   try {
-    const input = validateUserRegistration(req.body);
-
-    const existingUser = await users.findOne({
-      email: input.email,
-    });
-
-    if (existingUser) {
-      throw new AppError(
-        409,
-        'auth/email-already-in-use',
-        'Este e-mail já está cadastrado.'
-      );
-    }
-
-    const userDoc = {
-      id: createId(),
-      name: input.name,
-      email: input.email,
-      password_hash: bcrypt.hashSync(
-        input.password,
-        12
-      ),
-      phone: input.phone,
-      birth_date: input.birthDate,
-      role: 'user',
-      approved: false,
-      created_at: new Date().toISOString(),
-    };
-
-    await users.insertOne(userDoc);
-
-    const savedUser = await users.findOne({
-      id: userDoc.id,
-    });
-
-    const publicUser = toPublicUser(savedUser);
-    const token = createToken(savedUser);
-
-    return res.status(201).json({
-      token,
-      user: publicUser,
-      profile: publicUser,
-    });
+    const result = await registerUser(req.body);
+    return res.status(201).json(result);
   } catch (error) {
     return next(error);
   }
@@ -74,37 +26,8 @@ router.post('/register', async (req, res, next) => {
  */
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = validateLogin(
-      req.body
-    );
-
-    const user = await users.findOne({
-      email,
-    });
-
-    const isPasswordValid =
-      user &&
-      bcrypt.compareSync(
-        password,
-        user.password_hash
-      );
-
-    if (!isPasswordValid) {
-      throw new AppError(
-        401,
-        'auth/invalid-credential',
-        'E-mail ou senha incorretos.'
-      );
-    }
-
-    const publicUser = toPublicUser(user);
-    const token = createToken(user);
-
-    return res.json({
-      token,
-      user: publicUser,
-      profile: publicUser,
-    });
+    const result = await loginUser(req.body);
+    return res.json(result);
   } catch (error) {
     return next(error);
   }
@@ -114,14 +37,7 @@ router.post('/login', async (req, res, next) => {
  * Usuário autenticado
  */
 router.get('/me', authRequired, (req, res) => {
-  const publicUser = toPublicUser(
-    req.authUser
-  );
-
-  res.json({
-    user: publicUser,
-    profile: publicUser,
-  });
+  res.json(getCurrentUser(req.authUser));
 });
 
 /*

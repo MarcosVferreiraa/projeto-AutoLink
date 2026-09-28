@@ -12,12 +12,18 @@ export const normalizeProposalDraft = (data) => {
       }
     : null;
 
+  const normalizedPrice = Number(data?.price ?? data?.value ?? 0);
+  const normalizedOriginalPrice = Number(
+    data?.originalPrice ?? data?.carPrice ?? data?.price ?? data?.value ?? 0
+  );
+
   return {
     ...data,
     proposalType,
     financing,
-    originalPrice: Number(data?.originalPrice || 0),
-    price: Number(data?.price || 0),
+    originalPrice: normalizedOriginalPrice,
+    price: normalizedPrice,
+    buyerEmail: data?.buyerEmail || data?.createdByEmail || data?.email || "",
     status: "pending",
     createdAt: new Date().toISOString()
   };
@@ -46,8 +52,11 @@ export const validateProposalApproval = (proposal) => {
     return { valid: false, reason: "Proposta inválida." };
   }
 
-  const requestedValue = Number(proposal.price || 0);
-  const originalPrice = Number(proposal.originalPrice || 0);
+  const requestedValue = Number(proposal.price ?? proposal.value ?? 0);
+  const originalPrice = Number(
+    proposal.originalPrice ?? proposal.carPrice ?? proposal.price ?? proposal.value ?? 0
+  );
+
   if (requestedValue <= 0 || originalPrice <= 0) {
     return { valid: false, reason: "Valores da proposta/preço do veículo inválidos." };
   }

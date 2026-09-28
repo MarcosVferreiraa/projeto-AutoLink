@@ -173,7 +173,13 @@ export function validateProposalPayload(body) {
       : {};
 
   const message = normalizeText(payload.message);
-  const value = Number(payload.value);
+  const rawValue =
+    payload.value ?? payload.amount;
+  const value = Number(rawValue);
+  const normalizedStatus = normalizeText(
+    payload.status,
+    'pending'
+  ).toLowerCase();
 
   if (!message) {
     throw badRequest(
@@ -191,11 +197,25 @@ export function validateProposalPayload(body) {
     );
   }
 
+  if (
+    !['pending', 'approved', 'rejected'].includes(
+      normalizedStatus
+    )
+  ) {
+    throw badRequest(
+      'Status da proposta inválido.',
+      null,
+      'proposals/invalid-payload'
+    );
+  }
+
   return {
     message,
     value,
+    status: normalizedStatus,
     carId: String(payload.carId ?? ''),
     userId: String(payload.userId ?? ''),
+    ownerId: String(payload.ownerId ?? ''),
   };
 }
 

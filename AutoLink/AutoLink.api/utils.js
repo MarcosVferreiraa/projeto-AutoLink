@@ -2,9 +2,21 @@ import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { config } from './config.js';
 
-export const createId = () => crypto.randomUUID();
-export const now = () => new Date().toISOString();
-export const createToken = (user) => jwt.sign({ uid: user.id }, config.jwtSecret, { expiresIn: '1h' });
+export function createId() {
+  return crypto.randomUUID();
+}
+
+export function now() {
+  return new Date().toISOString();
+}
+
+export function createToken(user) {
+  return jwt.sign(
+    { uid: user.id },
+    config.jwtSecret,
+    { expiresIn: '1h' }
+  );
+}
 
 export function toPublicUser(user) {
   return {
@@ -22,9 +34,14 @@ export function toPublicUser(user) {
 }
 
 export function readPayload(row) {
+  const payload =
+    typeof row.payload === 'string'
+      ? JSON.parse(row.payload)
+      : row.payload;
+
   return {
     id: row.id,
-    ...(typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload),
+    ...payload,
     status: row.status,
     createdAt: row.created_at,
   };
