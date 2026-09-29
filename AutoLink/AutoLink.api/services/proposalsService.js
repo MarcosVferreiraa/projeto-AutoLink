@@ -56,6 +56,8 @@ export async function createProposal(user, body) {
     ...payload,
     userId: user.id,
     ownerId: user.id,
+    buyerId: user.id,
+    buyerEmail: user.email,
   };
   const status = 'pending';
 

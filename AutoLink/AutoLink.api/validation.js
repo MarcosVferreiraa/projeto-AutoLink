@@ -174,8 +174,15 @@ export function validateProposalPayload(body) {
 
   const message = normalizeText(payload.message);
   const rawValue =
-    payload.value ?? payload.amount;
+    payload.value ?? payload.amount ?? payload.price;
   const value = Number(rawValue);
+  const originalPrice = Number(
+    payload.originalPrice ?? payload.carPrice ?? value
+  );
+  const proposalType = normalizeText(
+    payload.proposalType,
+    'cash'
+  ).toLowerCase();
   const normalizedStatus = normalizeText(
     payload.status,
     'pending'
@@ -197,6 +204,22 @@ export function validateProposalPayload(body) {
     );
   }
 
+  if (!Number.isFinite(originalPrice) || originalPrice <= 0) {
+    throw badRequest(
+      'Preço original do veículo inválido.',
+      null,
+      'proposals/invalid-payload'
+    );
+  }
+
+  if (!['cash', 'financing'].includes(proposalType)) {
+    throw badRequest(
+      'Tipo de proposta inválido.',
+      null,
+      'proposals/invalid-payload'
+    );
+  }
+
   if (
     !['pending', 'approved', 'rejected'].includes(
       normalizedStatus
@@ -209,13 +232,60 @@ export function validateProposalPayload(body) {
     );
   }
 
+  const financing =
+    proposalType === 'financing' &&
+    payload.financing &&
+    typeof payload.financing === 'object'
+      ? {
+          downPayment: Number(payload.financing.downPayment || 0),
+          months: Number(payload.financing.months || 0),
+          interestRate: Number(payload.financing.interestRate || 0),
+          monthlyPayment: Number(payload.financing.monthlyPayment || 0),
+          financedAmount: Number(payload.financing.financedAmount || 0),
+          totalInterest: Number(payload.financing.totalInterest || 0),
+          totalAmount: Number(payload.financing.totalAmount || 0),
+        }
+      : null;
+
+  if (
+    proposalType === 'financing' &&
+    (!financing ||
+      !Number.isFinite(financing.downPayment) ||
+      !Number.isFinite(financing.months) ||
+      !Number.isFinite(financing.interestRate) ||
+      !Number.isFinite(financing.monthlyPayment) ||
+      !Number.isFinite(financing.financedAmount) ||
+      !Number.isFinite(financing.totalInterest) ||
+      !Number.isFinite(financing.totalAmount) ||
+      financing.downPayment < 0 ||
+      financing.months <= 0 ||
+      financing.interestRate < 0 ||
+      financing.monthlyPayment <= 0 ||
+      financing.financedAmount <= 0 ||
+      financing.totalInterest < 0 ||
+      financing.totalAmount <= 0)
+  ) {
+    throw badRequest(
+      'Dados de financiamento inválidos.',
+      null,
+      'proposals/invalid-payload'
+    );
+  }
+
   return {
     message,
     value,
+    price: value,
+    originalPrice,
+    proposalType,
+    financing,
     status: normalizedStatus,
     carId: String(payload.carId ?? ''),
-    userId: String(payload.userId ?? ''),
-    ownerId: String(payload.ownerId ?? ''),
+    carImage: normalizeText(payload.carImage),
+    carBrand: normalizeText(payload.carBrand),
+    carModel: normalizeText(payload.carModel),
+    carYear: payload.carYear ?? '',
+    buyerEmail: normalizeText(payload.buyerEmail),
   };
 }
 
