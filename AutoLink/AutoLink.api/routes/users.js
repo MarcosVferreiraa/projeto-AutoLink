@@ -16,9 +16,7 @@ import {
 
 const router = Router();
 
-/*
- * Atualizar perfil
- */
+
 router.patch('/me', authRequired, async (req, res, next) => {
   try {
     const result = await updateOwnProfile(
@@ -31,9 +29,7 @@ router.patch('/me', authRequired, async (req, res, next) => {
   }
 });
 
-/*
- * Alterar senha
- */
+
 router.patch(
   '/me/password',
   authRequired,
@@ -51,9 +47,6 @@ router.patch(
   }
 );
 
-/*
- * Excluir própria conta
- */
 router.delete('/me', authRequired, async (req, res, next) => {
   try {
     await deleteOwnAccount(
@@ -67,10 +60,7 @@ router.delete('/me', authRequired, async (req, res, next) => {
   }
 });
 
-/*
- * Listar todos os usuários
- * Apenas administradores
- */
+
 router.get(
   '/',
   authRequired,
@@ -84,10 +74,7 @@ router.get(
   }
 );
 
-/*
- * Alterar função do usuário
- * Apenas administradores
- */
+
 router.patch(
   '/:id/role',
   authRequired,
@@ -105,10 +92,6 @@ router.patch(
   }
 );
 
-/*
- * Excluir usuário
- * Apenas administradores
- */
 router.delete(
   '/:id',
   authRequired,

@@ -9,9 +9,7 @@ const router = Router();
 
 router.use(authRequired);
 
-/*
- * Listar favoritos do usuário
- */
+
 router.get('/', async (req, res) => {
   const userId = req.authUser.id;
 
@@ -40,9 +38,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-/*
- * Adicionar carro aos favoritos
- */
+
 router.post('/:carId', async (req, res) => {
   const userId = req.authUser.id;
   const carId = req.params.carId;
@@ -80,9 +76,7 @@ router.post('/:carId', async (req, res) => {
   });
 });
 
-/*
- * Remover carro dos favoritos
- */
+
 router.delete('/:carId', async (req, res) => {
   const userId = req.authUser.id;
   const carId = req.params.carId;

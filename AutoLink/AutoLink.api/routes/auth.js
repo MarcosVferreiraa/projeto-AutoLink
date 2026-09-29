@@ -9,9 +9,7 @@ import {
 
 const router = Router();
 
-/*
- * Registrar usuário
- */
+
 router.post('/register', async (req, res, next) => {
   try {
     const result = await registerUser(req.body);
@@ -21,9 +19,7 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-/*
- * Login
- */
+
 router.post('/login', async (req, res, next) => {
   try {
     const result = await loginUser(req.body);
@@ -33,26 +29,17 @@ router.post('/login', async (req, res, next) => {
   }
 });
 
-/*
- * Usuário autenticado
- */
+
 router.get('/me', authRequired, (req, res) => {
   res.json(getCurrentUser(req.authUser));
 });
 
-/*
- * Logout
- *
- * Como o JWT é stateless, o logout é tratado
- * pelo cliente removendo o token.
- */
+
 router.post('/logout', (_req, res) => {
   res.status(204).end();
 });
 
-/*
- * Recuperação de senha
- */
+
 router.post('/forgot-password', (_req, res) => {
   res.json({
     message:

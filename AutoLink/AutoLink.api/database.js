@@ -27,21 +27,21 @@ export async function connectDatabase() {
     },
   });
 
-  // Conexão
+  
   await client.connect();
 
   database = client.db(config.mongoDatabase);
 
-  // Verifica comunicação com o MongoDB
+  
   await database.command({ ping: 1 });
 
-  // Collections
+  
   users = database.collection('users');
   cars = database.collection('cars');
   favorites = database.collection('favorites');
   proposals = database.collection('proposals');
 
-  // Índices
+  
   await users.createIndex(
     { email: 1 },
     { unique: true }

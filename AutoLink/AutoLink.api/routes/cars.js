@@ -16,9 +16,7 @@ import { listCars } from '../services/carsService.js';
 
 const router = Router();
 
-/*
- * Listar carros
- */
+
 router.get('/', async (req, res, next) => {
   try {
     console.log('DEBUG /api/cars - início');
@@ -38,9 +36,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-/*
- * Criar carro
- */
+
 router.post('/', authRequired, async (req, res, next) => {
   try {
     const payload = validateCarPayload(req.body);
@@ -67,9 +63,7 @@ router.post('/', authRequired, async (req, res, next) => {
   }
 });
 
-/*
- * Atualizar carro
- */
+
 router.patch('/:id', authRequired, async (req, res, next) => {
   try {
     const carId = req.params.id;
@@ -131,9 +125,7 @@ router.patch('/:id', authRequired, async (req, res, next) => {
   }
 });
 
-/*
- * Excluir carro
- */
+
 router.delete('/:id', authRequired, async (req, res, next) => {
   try {
     const carId = req.params.id;

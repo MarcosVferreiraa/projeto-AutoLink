@@ -12,12 +12,7 @@ const router = Router();
 
 router.use(authRequired);
 
-/*
- * Listar propostas
- *
- * Administradores podem visualizar todas.
- * Usuários comuns visualizam apenas as próprias.
- */
+
 router.get('/', async (req, res, next) => {
   try {
     res.json(await listProposals(req.authUser));
@@ -26,9 +21,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-/*
- * Criar proposta
- */
+
 router.post('/', async (req, res, next) => {
   try {
     const result = await createProposal(
@@ -41,9 +34,7 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-/*
- * Atualizar proposta
- */
+
 router.patch('/:id', async (req, res, next) => {
   try {
     res.json(await updateProposal(req));
@@ -52,9 +43,7 @@ router.patch('/:id', async (req, res, next) => {
   }
 });
 
-/*
- * Excluir proposta
- */
+
 router.delete('/:id', async (req, res, next) => {
   try {
     await deleteProposal(req);
