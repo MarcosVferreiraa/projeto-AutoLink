@@ -44,6 +44,14 @@ export function Home() {
     });
   };
 
+  const handlePageChange = (nextPage) => {
+    setPage(nextPage);
+    document.getElementById('car-listing')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
   useEffect(() => {
     fetchCars({
       page,
@@ -189,7 +197,7 @@ export function Home() {
             <FilterSidebar onFilterChange={handleFilterChange} />
           </aside>
 
-          <main className="lg:col-span-3">
+          <main id="car-listing" className="lg:col-span-3">
             <div className="flex items-center justify-between mb-6 stock-toolbar">
               <div>
                 <h2>Carros Disponíveis</h2>
@@ -244,7 +252,7 @@ export function Home() {
               <div className="flex justify-center items-center gap-3 mt-8">
                 <button
                   type="button"
-                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  onClick={() => handlePageChange(Math.max(1, page - 1))}
                   disabled={!pagination.hasPrev}
                   className="px-4 py-2 rounded-lg border border-border disabled:opacity-50"
                 >
@@ -255,7 +263,7 @@ export function Home() {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setPage((current) => current + 1)}
+                  onClick={() => handlePageChange(page + 1)}
                   disabled={!pagination.hasNext}
                   className="px-4 py-2 rounded-lg border border-border disabled:opacity-50"
                 >

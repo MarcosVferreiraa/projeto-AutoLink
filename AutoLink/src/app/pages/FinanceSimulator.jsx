@@ -19,6 +19,7 @@ export function FinanceSimulator() {
   const [months, setMonths] = useState('48');
   const [interestRate] = useState(1.5);
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
+  const [isAdminDashboardOpen, setIsAdminDashboardOpen] = useState(true);
   const [proposalMessage, setProposalMessage] = useState('');
   const [proposalError, setProposalError] = useState('');
   const [isSendingProposal, setIsSendingProposal] = useState(false);
@@ -49,6 +50,13 @@ export function FinanceSimulator() {
   };
 
   const result = calculateMonthlyPayment();
+  const simulationError = Number(carPrice) <= 0
+    ? 'Informe um valor de veículo maior que zero.'
+    : Number(downPayment) < 0
+      ? 'A entrada não pode ser negativa.'
+      : Number(downPayment) >= Number(carPrice)
+        ? 'A entrada precisa ser menor que o valor do veículo para haver financiamento.'
+        : '';
 
   const adminFinanceData = useMemo(() => {
     const allAdminProposals = proposals || [];
@@ -114,7 +122,7 @@ export function FinanceSimulator() {
     };
   }, [adminStatusFilter, adminTypeFilter, proposals]);
 
-  if (isAdmin) {
+  if (isAdmin && isAdminDashboardOpen) {
     return (
       <div className="simulator-container">
         <div className="simulator-header">
@@ -123,6 +131,13 @@ export function FinanceSimulator() {
             <h1>Painel de Propostas (Admin)</h1>
           </div>
           <p>Visão consolidada das propostas de financiamento e à vista.</p>
+          <button
+            type="button"
+            className="btn-request-finance admin-simulator-toggle"
+            onClick={() => setIsAdminDashboardOpen(false)}
+          >
+            Abrir simulador de financiamento
+          </button>
         </div>
 
         <div className="admin-finance-grid">
@@ -326,22 +341,32 @@ export function FinanceSimulator() {
           <h1>Simulador de Financiamento</h1>
         </div>
         <p>Calcule o valor aproximado das parcelas para o seu próximo veículo</p>
+        {isAdmin && (
+          <button
+            type="button"
+            className="btn-request-finance admin-simulator-toggle"
+            onClick={() => setIsAdminDashboardOpen(true)}
+          >
+            Voltar ao painel de propostas
+          </button>
+        )}
       </div>
 
       <div className="simulator-layout">
         {/* COLUNA ESQUERDA: INPUTS */}
         <div className="simulator-card">
           <div className="form-group">
-            <label>Valor do Veículo (€)</label>
-            <input type="number" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} />
+            <label htmlFor="finance-car-price">Valor do Veículo (€)</label>
+            <input id="finance-car-price" type="number" min="0" step="any" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Valor de Entrada (€)</label>
-            <input type="number" value={downPayment} onChange={(e) => setDownPayment(e.target.value)} />
+            <label htmlFor="finance-down-payment">Valor de Entrada (€)</label>
+            <input id="finance-down-payment" type="number" min="0" step="any" value={downPayment} onChange={(e) => setDownPayment(e.target.value)} aria-invalid={Boolean(simulationError)} aria-describedby={simulationError ? 'finance-simulation-error' : undefined} />
+            {simulationError && <p id="finance-simulation-error" className="finance-simulation-error" role="alert">{simulationError}</p>}
           </div>
           <div className="form-group">
-            <label>Prazo de Pagamento</label>
-            <select value={months} onChange={(e) => setMonths(e.target.value)}>
+            <label htmlFor="finance-months">Prazo de Pagamento</label>
+            <select id="finance-months" value={months} onChange={(e) => setMonths(e.target.value)}>
               <option value="12">12 meses</option>
               <option value="24">24 meses</option>
               <option value="36">36 meses</option>
