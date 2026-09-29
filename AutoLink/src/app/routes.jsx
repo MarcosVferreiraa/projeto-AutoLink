@@ -7,6 +7,7 @@ import { MyProposals } from './pages/MyProposals';
 import { FinanceSimulator } from './pages/FinanceSimulator';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
+import { ResetPassword } from './pages/ResetPassword';
 import Register from './pages/Register';
 import { NotFound } from './pages/NotFound';
 import { AdminProposals } from './pages/AdminProposals';
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: 'financiamento', Component: FinanceSimulator },
       { path: 'login', Component: Home },
       { path: 'register', Component: Register },
+      { path: 'redefinir-senha', Component: ResetPassword },
       { path: 'sobre', Component: About },
       { path: 'contato', Component: Contact },
       { path: 'admin/propostas', element: <AdminRoute><AdminProposals /></AdminRoute> },

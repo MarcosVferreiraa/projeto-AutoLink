@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useProposals } from "../context/ProposalsContext";
+import { formatCurrency } from "../utils/currency";
 import "./AdminProposals.css";
 
 export function AdminProposals() {
@@ -36,8 +37,6 @@ export function AdminProposals() {
       return statusOk && typeOk;
     });
   }, [proposals, statusFilter, typeFilter]);
-
-  const formatCurrency = (value) => `R$ ${Number(value || 0).toLocaleString('pt-BR')}`;
 
   const handleApprove = async (proposal) => {
     const validation = canApproveProposal(proposal);

@@ -2,6 +2,7 @@ import { FileText, Clock, CheckCircle, XCircle, LogIn } from 'lucide-react';
 import { Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { useProposals } from '../context/ProposalsContext';
+import { formatCurrency } from '../utils/currency';
 import './MyProposals.css';
 export function MyProposals() {
   const { user } = useAuth();
@@ -84,13 +85,13 @@ export function MyProposals() {
                     <div className="price-item">
                       <span className="label-text">Preço do Veículo</span>
                       <span className="value-text">
-                        R$ {proposal.originalPrice ? proposal.originalPrice.toLocaleString('pt-BR') : 'N/A'}
+                        {proposal.originalPrice ? formatCurrency(proposal.originalPrice) : 'N/A'}
                       </span>
                     </div>
                     <div className="price-item">
                       <span className="label-text">Sua Proposta</span>
                       <span className="value-text proposed">
-                        R$ {proposal.price.toLocaleString('pt-BR')}
+                        {formatCurrency(proposal.price)}
                       </span>
                     </div>
                   </div>

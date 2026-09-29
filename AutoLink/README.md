@@ -35,6 +35,22 @@ API_PORT=3001
 
 The Atlas user must have access to the `autolink` database and the development machine IP must be allowed in **Network Access**.
 
+### Password reset email
+
+Configure these values in `AutoLink.api/.env` to enable password recovery. The SMTP credentials are secrets and must not be committed:
+
+```env
+APP_URL=http://localhost:5173
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-user
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM=AutoLink <no-reply@example.com>
+```
+
+Use the SMTP host, port, and credentials from your mail provider. The API sends a single-use link that expires after one hour.
+
 ### API structure
 
 - `AutoLink.api/index.js` — entrypoint and route registration

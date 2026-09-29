@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, ScrollRestoration, useLocation, useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import { LoginModal } from "../components/LoginModal";
 import { ProfileModal } from "../components/ProfileModal";
@@ -61,6 +61,7 @@ export function Root() {
       )}
 
       <Outlet />
+      <ScrollRestoration />
 
       <footer className="bg-card border-t border-border mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

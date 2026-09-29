@@ -3,7 +3,9 @@ import { Router } from 'express';
 import { authRequired } from '../middleware/auth.js';
 import {
   getCurrentUser,
+  completePasswordReset,
   loginUser,
+  requestPasswordReset,
   registerUser,
 } from '../services/authService.js';
 
@@ -40,11 +42,22 @@ router.post('/logout', (_req, res) => {
 });
 
 
-router.post('/forgot-password', (_req, res) => {
-  res.json({
-    message:
-      'Se o e-mail existir, as instruções serão enviadas.',
-  });
+router.post('/forgot-password', async (req, res, next) => {
+  try {
+    const result = await requestPasswordReset(req.body?.email);
+    return res.json(result);
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post('/reset-password', async (req, res, next) => {
+  try {
+    await completePasswordReset(req.body);
+    return res.status(204).end();
+  } catch (error) {
+    return next(error);
+  }
 });
 
 export default router;

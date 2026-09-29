@@ -5,6 +5,7 @@ import { useCars } from '../context/CarContext';
 import { useAuth } from '../context/AuthContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useProposals } from '../context/ProposalsContext';
+import { formatCurrency } from '../utils/currency';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './CarDetails.css';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -130,7 +131,7 @@ export function CarDetails() {
             }}
           />
           <h1>{car.brand} {car.model}</h1>
-          <div className="car-price-value">R$ {Number(car.price).toLocaleString('pt-BR')}</div>
+          <div className="car-price-value">{formatCurrency(car.price)}</div>
 
           {/* Grade de Especificações */}
           <div className="specs-grid">
@@ -196,7 +197,7 @@ export function CarDetails() {
             </p>
 
             <form onSubmit={handleSendProposal} className="proposal-modal-form">
-              <label htmlFor="proposal-value">Valor da Proposta (R$)</label>
+              <label htmlFor="proposal-value">Valor da Proposta (€)</label>
               <input
                 id="proposal-value"
                 type="number"

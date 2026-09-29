@@ -21,3 +21,25 @@
   background-color: #1f2937;
   transform: scale(1.08);
 }
+
+@media (max-width: 640px) {
+  .home-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .home-hero-actions > button {
+    width: 100%;
+  }
+
+  .stock-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stock-sort-select {
+    width: 100%;
+    min-width: 0;
+  }
+}

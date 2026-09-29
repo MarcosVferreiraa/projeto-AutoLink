@@ -53,3 +53,60 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
 }
+
+.filter-sidebar-toggle {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .filter-sidebar {
+    padding: 1rem 1.125rem;
+  }
+
+  .filter-sidebar-desktop-header {
+    display: none;
+  }
+
+  .filter-sidebar-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .filter-sidebar-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .filter-sidebar-toggle-label > span {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .filter-sidebar-toggle-chevron {
+    transition: transform 0.2s ease;
+  }
+
+  .filter-sidebar-toggle[aria-expanded='true'] .filter-sidebar-toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  .filter-sidebar-section {
+    display: none;
+    margin-top: 0.75rem;
+  }
+
+  .filter-sidebar-section.is-expanded {
+    display: flex;
+  }
+}

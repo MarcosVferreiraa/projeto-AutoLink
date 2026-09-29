@@ -85,7 +85,7 @@ export function EditCar() {
             <input type="number" name="year" value={formData.year} onChange={handleChange} required />
           </div>
           <div className="form-field-group">
-            <label>Preço</label>
+            <label>Preço (€)</label>
             <input type="number" name="price" value={formData.price} onChange={handleChange} required />
           </div>
         </div>

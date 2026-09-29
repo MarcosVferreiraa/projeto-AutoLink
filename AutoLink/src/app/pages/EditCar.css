@@ -20,7 +20,7 @@
 
 .form-grid-2cols {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -58,3 +58,23 @@
 
 .btn-save-car { background-color: #2563eb; color: white; }
 .btn-cancel-edit { background-color: #f3f4f6; color: #374151; }
+
+@media (max-width: 520px) {
+  .edit-car-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .form-grid-2cols {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions-zone {
+    flex-direction: column;
+  }
+
+  .btn-save-car,
+  .btn-cancel-edit {
+    width: 100%;
+  }
+}

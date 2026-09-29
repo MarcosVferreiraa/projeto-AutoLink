@@ -3,7 +3,7 @@ import { apiFetch, clearToken, getToken, jsonBody } from "../api";
 import { formatPhoneByThreeDigits } from "../utils/phone";
 
 const AuthContext = createContext(undefined);
-const SESSION_DURATION = 60 * 60 * 1000;
+const SESSION_DURATION = 5 * 60 * 1000;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -47,6 +47,13 @@ export function AuthProvider({ children }) {
     const normalizedEmail = String(email || "").trim();
     if (!normalizedEmail) throw new Error("Digite um e-mail para recuperar a senha.");
     await apiFetch("/auth/forgot-password", { method: "POST", body: jsonBody({ email: normalizedEmail }) });
+  }
+
+  async function completePasswordReset(token, password) {
+    await apiFetch("/auth/reset-password", {
+      method: "POST",
+      body: jsonBody({ token, password }),
+    });
   }
 
   async function updateProfile(profileData) {
@@ -106,6 +113,7 @@ export function AuthProvider({ children }) {
       login,
       register,
       resetPassword,
+      completePasswordReset,
       logout,
       deleteAccount,
       updateProfile,

@@ -164,7 +164,7 @@ export function Home() {
             <p className="text-xl mb-8 text-primary-foreground/90">
               Os melhores seminovos com procedência garantida e condições especiais de financiamento
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 home-hero-actions">
               <button
                 onClick={() => window.scrollTo({ top: 600, behavior: 'smooth' })}
                 className="px-6 py-3 bg-primary-foreground text-primary rounded-lg hover:opacity-90 transition-opacity"
@@ -190,7 +190,7 @@ export function Home() {
           </aside>
 
           <main className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 stock-toolbar">
               <div>
                 <h2>Carros Disponíveis</h2>
                 <p className="text-muted-foreground">
@@ -200,7 +200,7 @@ export function Home() {
 
               <div className="flex items-center gap-2">
                 <select
-                  className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="px-3 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring stock-sort-select"
                   value={sortCriterion}
                   onChange={(e) => setSortCriterion(e.target.value)}
                 >

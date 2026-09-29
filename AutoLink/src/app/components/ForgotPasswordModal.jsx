@@ -29,8 +29,10 @@ export function ForgotPasswordModal({
       setInfo(
         "Se o e-mail estiver cadastrado, enviamos um link para redefinir a senha."
       );
-    } catch {
-      setError("Não foi possível enviar o e-mail de recuperação.");
+    } catch (requestError) {
+      setError(requestError.code === "auth/password-reset-unavailable"
+        ? "O envio de e-mails ainda não está configurado. Configure o SMTP da API."
+        : "Não foi possível enviar o e-mail de recuperação.");
     }
   };
 

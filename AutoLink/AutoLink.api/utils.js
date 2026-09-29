@@ -14,7 +14,7 @@ export function createToken(user) {
   return jwt.sign(
     { uid: user.id },
     config.jwtSecret,
-    { expiresIn: '1h' }
+    { expiresIn: '5m' }
   );
 }
 

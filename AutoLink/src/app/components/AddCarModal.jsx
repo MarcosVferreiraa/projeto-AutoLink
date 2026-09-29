@@ -302,7 +302,7 @@ export function AddCarModal({ isOpen, onClose, onAddCar }) {
 
             <div>
               <label className={styles.addCarModalLabel}>
-                Preço (R$)
+                Preço (€)
               </label>
 
               <input

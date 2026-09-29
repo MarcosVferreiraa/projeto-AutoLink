@@ -111,3 +111,40 @@
   gap: 0.5rem;
 }
 
+@media (max-width: 640px) {
+  .contact-container {
+    padding: 2.5rem 1rem;
+  }
+
+  .contact-header {
+    margin-bottom: 2rem;
+  }
+
+  .contact-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .info-card,
+  .contact-form-wrapper {
+    min-width: 0;
+  }
+
+  .info-card {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .info-content {
+    min-width: 0;
+  }
+
+  .info-content p {
+    overflow-wrap: anywhere;
+  }
+
+  .contact-form-wrapper {
+    padding: 1.25rem;
+  }
+}
+

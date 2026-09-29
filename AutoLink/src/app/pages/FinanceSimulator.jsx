@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useProposals } from '../context/ProposalsContext';
+import { formatCurrency } from '../utils/currency';
 import './FinanceSimulator.css';
 
 const SIMULATION_PLACEHOLDER_IMAGE = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'><rect width='640' height='360' fill='%23f3f4f6'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='24' font-family='Arial,sans-serif'>Simulacao de Compra</text></svg>";
@@ -48,13 +49,6 @@ export function FinanceSimulator() {
   };
 
   const result = calculateMonthlyPayment();
-
-  const formatCurrency = (value) => {
-    return Number(value || 0).toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  };
 
   const adminFinanceData = useMemo(() => {
     const allAdminProposals = proposals || [];
@@ -304,7 +298,7 @@ export function FinanceSimulator() {
         },
         buyerId: user.uid || user.id,
         buyerEmail: user.email || userProfile?.email || 'email-nao-informado',
-        message: proposalMessage || `Proposta via simulador: entrada de R$ ${Number(downPayment || 0).toLocaleString('pt-BR')} em ${months}x.`
+        message: proposalMessage || `Proposta via simulador: entrada de ${formatCurrency(downPayment)} em ${months}x.`
       });
 
       setIsProposalModalOpen(false);
@@ -338,11 +332,11 @@ export function FinanceSimulator() {
         {/* COLUNA ESQUERDA: INPUTS */}
         <div className="simulator-card">
           <div className="form-group">
-            <label>Valor do Veículo (R$)</label>
+            <label>Valor do Veículo (€)</label>
             <input type="number" value={carPrice} onChange={(e) => setCarPrice(e.target.value)} />
           </div>
           <div className="form-group">
-            <label>Valor de Entrada (R$)</label>
+            <label>Valor de Entrada (€)</label>
             <input type="number" value={downPayment} onChange={(e) => setDownPayment(e.target.value)} />
           </div>
           <div className="form-group">
@@ -364,18 +358,18 @@ export function FinanceSimulator() {
         <div className="simulator-results-column">
           <div className="simulator-card results-display-card">
             <p className="payment-label">Parcela Mensal Estimada</p>
-            <h2 className="payment-value">R$ {result.monthlyPayment.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h2>
+            <h2 className="payment-value">{formatCurrency(result.monthlyPayment)}</h2>
             <p className="payment-term">em {months}x fixas</p>
           </div>
 
           <div className="simulator-card details-breakdown-card">
             <h3>Resumo da Simulação</h3>
             <div className="breakdown-list">
-              <div className="breakdown-row"><span className="label-text">Preço do Carro</span><span>R$ {Number(carPrice).toLocaleString('pt-BR')}</span></div>
-              <div className="breakdown-row"><span className="label-text">Entrada</span><span>R$ {Number(downPayment).toLocaleString('pt-BR')}</span></div>
-              <div className="breakdown-row"><span className="label-text">Valor Financiado</span><span>R$ {result.financedAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-              <div className="breakdown-row"><span className="label-text">Total de Juros</span><span>R$ {result.totalInterest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-              <div className="breakdown-row total-row"><span className="label-text">Total a Pagar</span><span className="value-text">R$ {result.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+              <div className="breakdown-row"><span className="label-text">Preço do Carro</span><span>{formatCurrency(carPrice)}</span></div>
+              <div className="breakdown-row"><span className="label-text">Entrada</span><span>{formatCurrency(downPayment)}</span></div>
+              <div className="breakdown-row"><span className="label-text">Valor Financiado</span><span>{formatCurrency(result.financedAmount)}</span></div>
+              <div className="breakdown-row"><span className="label-text">Total de Juros</span><span>{formatCurrency(result.totalInterest)}</span></div>
+              <div className="breakdown-row total-row"><span className="label-text">Total a Pagar</span><span className="value-text">{formatCurrency(result.totalAmount)}</span></div>
             </div>
           </div>
 
@@ -393,9 +387,9 @@ export function FinanceSimulator() {
 
             <form onSubmit={handleSendProposal} className="finance-proposal-form">
               <div className="finance-summary-box">
-                <div><span>Preço:</span><strong>R$ {Number(carPrice).toLocaleString('pt-BR')}</strong></div>
-                <div><span>Entrada:</span><strong>R$ {Number(downPayment).toLocaleString('pt-BR')}</strong></div>
-                <div><span>Proposta:</span><strong>R$ {(Number(carPrice) - Number(downPayment || 0)).toLocaleString('pt-BR')}</strong></div>
+                <div><span>Preço:</span><strong>{formatCurrency(carPrice)}</strong></div>
+                <div><span>Entrada:</span><strong>{formatCurrency(downPayment)}</strong></div>
+                <div><span>Proposta:</span><strong>{formatCurrency(Number(carPrice) - Number(downPayment || 0))}</strong></div>
                 <div><span>Prazo:</span><strong>{months} meses</strong></div>
               </div>
 

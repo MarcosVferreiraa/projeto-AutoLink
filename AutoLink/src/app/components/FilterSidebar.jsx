@@ -1,7 +1,9 @@
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import './FilterSidebar.css';
 
 export function FilterSidebar({ onFilterChange }) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,12 +16,29 @@ export function FilterSidebar({ onFilterChange }) {
 
   return (
     <div className="filter-sidebar">
-      <div className="filter-sidebar-header">
+      <div className="filter-sidebar-header filter-sidebar-desktop-header">
         <SlidersHorizontal className="w-5 h-5" />
         <h2>Filtros</h2>
       </div>
 
-      <div className="filter-sidebar-section">
+      <button
+        type="button"
+        className="filter-sidebar-toggle"
+        aria-expanded={isMobileOpen}
+        aria-controls="home-filter-fields"
+        onClick={() => setIsMobileOpen((isOpen) => !isOpen)}
+      >
+        <span className="filter-sidebar-toggle-label">
+          <SlidersHorizontal className="w-5 h-5" />
+          <span>Filtros</span>
+        </span>
+        <ChevronDown className="filter-sidebar-toggle-chevron w-5 h-5" />
+      </button>
+
+      <div
+        id="home-filter-fields"
+        className={`filter-sidebar-section ${isMobileOpen ? 'is-expanded' : ''}`}
+      >
         {/* Campo de pesquisa de texto livre */}
         <div>
           <label className="filter-sidebar-label">Buscar</label>
@@ -65,7 +84,7 @@ export function FilterSidebar({ onFilterChange }) {
 
         {/* Filtros de Intervalo de Preços */}
         <div>
-          <label className="filter-sidebar-label">Faixa de Preço (R$)</label>
+          <label className="filter-sidebar-label">Faixa de Preço (€)</label>
           <div className="filter-sidebar-grid">
             <input
               type="number"

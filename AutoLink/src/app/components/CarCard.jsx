@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router';
 import { Car, Gauge, Calendar, Fuel } from 'lucide-react';
+import { formatCurrency } from '../utils/currency';
 import './CarCard.css';
 
 const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'%3E%3Crect width='640' height='360' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-family='Arial,sans-serif' font-size='28'%3EImagem indisponivel%3C/text%3E%3C/svg%3E";
@@ -8,6 +9,7 @@ export function CarCard({ id, image, brand, model, year, price, mileage, fuel, t
   const navigate = useNavigate();
   const formattedPrice = Number(price);
   const formattedMileage = Number(mileage);
+  const formattedTransmission = /^autom/i.test(transmission || '') ? 'Automático' : transmission;
 
   return (
     <div
@@ -45,7 +47,7 @@ export function CarCard({ id, image, brand, model, year, price, mileage, fuel, t
             </div>
             <div className="car-card-feature">
               <Car className="w-4 h-4" />
-              <span>{transmission}</span>
+              <span>{formattedTransmission}</span>
             </div>
             <div className="car-card-feature">
               <Calendar className="w-4 h-4" />
@@ -57,7 +59,7 @@ export function CarCard({ id, image, brand, model, year, price, mileage, fuel, t
             <div>
               <p className="car-card-price-label">Preço</p>
               <p className="car-card-price">
-                {Number.isFinite(formattedPrice) ? `R$ ${formattedPrice.toLocaleString('pt-BR')}` : 'Preço não informado'}
+                {Number.isFinite(formattedPrice) ? formatCurrency(formattedPrice) : 'Preço não informado'}
               </p>
             </div>
             <Link

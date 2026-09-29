@@ -107,8 +107,11 @@ export function Header({
             </Link>
           </nav>
           <button
+            type="button"
             className="mobile-menu-button"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

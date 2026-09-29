@@ -282,6 +282,56 @@
 }
 
 @media (max-width: 700px) {
+  .simulator-container {
+    padding: 2rem 1rem;
+  }
+
+  .simulator-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .simulator-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .simulator-card {
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .payment-value {
+    font-size: 2rem;
+    overflow-wrap: anywhere;
+  }
+
+  .breakdown-row {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .breakdown-row > :last-child {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .finance-summary-box div {
+    gap: 0.5rem;
+  }
+
+  .finance-summary-box strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .finance-proposal-actions {
+    flex-wrap: wrap;
+  }
+
+  .finance-proposal-btn {
+    flex: 1 1 8rem;
+  }
+
   .admin-finance-grid {
     grid-template-columns: 1fr;
   }
