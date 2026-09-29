@@ -4,9 +4,6 @@ import { MongoClient, ServerApiVersion } from 'mongodb';
 
 import { config } from './config.js';
 
-let client;
-
-export let database;
 export let users;
 export let cars;
 export let favorites;
@@ -19,7 +16,7 @@ export async function connectDatabase() {
     throw new Error('MONGODB_URI não configurada.');
   }
 
-  client = new MongoClient(config.mongoUri, {
+  const client = new MongoClient(config.mongoUri, {
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,
@@ -30,7 +27,7 @@ export async function connectDatabase() {
   
   await client.connect();
 
-  database = client.db(config.mongoDatabase);
+  const database = client.db(config.mongoDatabase);
 
   
   await database.command({ ping: 1 });

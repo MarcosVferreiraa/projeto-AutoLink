@@ -19,19 +19,9 @@ const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    console.log('DEBUG /api/cars - início');
-    console.log('DEBUG cars:', !!cars);
-
     const result = await listCars(req.query);
-
-    console.log(
-      'DEBUG /api/cars - resultado:',
-      result?.cars?.length
-    );
-
     res.json(result);
   } catch (error) {
-    console.error('DEBUG /api/cars - ERRO REAL:', error);
     next(error);
   }
 });
