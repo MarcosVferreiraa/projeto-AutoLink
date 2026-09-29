@@ -1,5 +1,4 @@
 
-import bcrypt from 'bcryptjs';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
 import { config } from './config.js';
@@ -8,8 +7,6 @@ export let users;
 export let cars;
 export let favorites;
 export let proposals;
-
-const ADMIN_ID = 'admin-fixo-desenvolvimento-123';
 
 export async function connectDatabase() {
   if (!config.mongoUri) {
@@ -55,29 +52,6 @@ export async function connectDatabase() {
   );
 }
 
-export async function seedDevelopmentAdmin() {
-  const admin = {
-    id: ADMIN_ID,
-    name: 'Administrador Geral',
-    email: 'admin@stand.com',
-    password_hash: bcrypt.hashSync('123456', 12),
-    phone: '912 345 678',
-    birth_date: '',
-    role: 'admin',
-    approved: true,
-    created_at: new Date().toISOString(),
-  };
-
-  await users.updateOne(
-    { id: ADMIN_ID },
-    {
-      $setOnInsert: admin,
-    },
-    {
-      upsert: true,
-    }
-  );
-}
 export function getCollections() {
   if (!users || !cars || !favorites || !proposals) {
     throw new Error('Banco de dados ainda não foi inicializado.');

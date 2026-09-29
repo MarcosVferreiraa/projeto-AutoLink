@@ -2,10 +2,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { config } from './config.js';
-import {
-  connectDatabase,
-  seedDevelopmentAdmin,
-} from './database.js';
+import { connectDatabase } from './database.js';
 
 import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
@@ -25,7 +22,6 @@ let databasePromise;
 async function ensureDatabase() {
   if (!databasePromise) {
     databasePromise = connectDatabase()
-      .then(() => seedDevelopmentAdmin())
       .catch((error) => {
         databasePromise = null;
         throw error;
