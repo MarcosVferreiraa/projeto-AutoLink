@@ -2,6 +2,7 @@ import { Calculator } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationsContext';
 import { useProposals } from '../context/ProposalsContext';
 import { formatCurrency } from '../utils/currency';
 import './FinanceSimulator.css';
@@ -12,6 +13,7 @@ export function FinanceSimulator() {
   const location = useLocation();
   const selectedCar = location.state?.car;
   const { user, userProfile, isAdmin } = useAuth();
+  const { notify } = useNotifications();
   const { addProposal, proposals } = useProposals();
 
   const [carPrice, setCarPrice] = useState('150000');
@@ -318,7 +320,7 @@ export function FinanceSimulator() {
 
       setIsProposalModalOpen(false);
       setProposalMessage('');
-      alert('Proposta enviada para análise do administrador.');
+      notify('Proposta enviada para análise do administrador.', 'success');
     } catch (error) {
       console.error('Erro ao enviar proposta:', error);
       setProposalError('Não foi possível enviar a proposta agora. Tente novamente.');

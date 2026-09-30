@@ -3,12 +3,14 @@ import { ShieldAlert, Trash2, Users, Mail, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch, jsonBody } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationsContext';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './AdminUsers.css';
 
 export function AdminUsers() {
 
   const { user, isAdmin } = useAuth();
+  const { notify } = useNotifications();
   const navigate = useNavigate();
   const [usersList, setUsersList] = useState([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -70,7 +72,7 @@ export function AdminUsers() {
       setUsersList(result.users || []);
     } catch (error) {
       console.error('Erro ao carregar utilizadores:', error);
-      alert('Não foi possível carregar os utilizadores.');
+      notify('Não foi possível carregar os utilizadores.', 'error');
     } finally {
       setIsLoadingUsers(false);
     }
@@ -90,7 +92,7 @@ export function AdminUsers() {
     const newRole = account.role === 'admin' ? 'user' : 'admin';
 
     if (isSelf && newRole === 'user') {
-      alert('Não podes remover o teu próprio acesso de administrador nesta sessão.');
+      notify('Não podes remover o teu próprio acesso de administrador nesta sessão.', 'warning');
       return;
     }
 
@@ -103,7 +105,7 @@ export function AdminUsers() {
       setUsersList(prev => prev.map(u => u.id === account.id ? { ...u, role: newRole } : u));
     } catch (error) {
       console.error('Erro ao atualizar papel do utilizador:', error);
-      alert('Não foi possível atualizar o papel do utilizador.');
+      notify('Não foi possível atualizar o papel do utilizador.', 'error');
     } finally {
       setProcessingUserId("");
     }
@@ -111,7 +113,7 @@ export function AdminUsers() {
 
   const handleDeleteUser = async (id, email) => {
     if (id === user?.uid) {
-      alert('Não podes apagar o teu próprio utilizador aqui.');
+      notify('Não podes apagar o teu próprio utilizador aqui.', 'warning');
       return;
     }
 
@@ -122,7 +124,7 @@ export function AdminUsers() {
         setUsersList(prev => prev.filter(u => u.id !== id));
       } catch (error) {
         console.error('Erro ao apagar utilizador:', error);
-        alert('Não foi possível apagar o utilizador.');
+        notify('Não foi possível apagar o utilizador.', 'error');
       } finally {
         setProcessingUserId("");
       }

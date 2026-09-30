@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationsContext";
 import { useProposals } from "../context/ProposalsContext";
 import { formatCurrency } from "../utils/currency";
 import "./AdminProposals.css";
 
 export function AdminProposals() {
   const { user, isAdmin } = useAuth();
+  const { notify } = useNotifications();
   const { proposals, acceptProposal, rejectProposal, cancelProposal, canApproveProposal } = useProposals();
   const navigate = useNavigate();
   const [processingId, setProcessingId] = useState("");
@@ -41,7 +43,7 @@ export function AdminProposals() {
   const handleApprove = async (proposal) => {
     const validation = canApproveProposal(proposal);
     if (!validation.valid) {
-      alert(validation.reason);
+      notify(validation.reason, 'warning');
       return;
     }
 
@@ -49,7 +51,7 @@ export function AdminProposals() {
       setProcessingId(proposal.id);
       await acceptProposal(proposal.id, proposal);
     } catch (error) {
-      alert(error?.message || 'Não foi possível aprovar a proposta.');
+      notify(error?.message || 'Não foi possível aprovar a proposta.', 'error');
     } finally {
       setProcessingId("");
     }
@@ -60,7 +62,7 @@ export function AdminProposals() {
       setProcessingId(proposal.id);
       await rejectProposal(proposal.id, 'Recusada pela administração.');
     } catch {
-      alert('Não foi possível recusar a proposta.');
+      notify('Não foi possível recusar a proposta.', 'error');
     } finally {
       setProcessingId("");
     }
@@ -72,7 +74,7 @@ export function AdminProposals() {
     );
 
     if (pending.length === 0) {
-      alert('Não há propostas pendentes para apagar.');
+      notify('Não há propostas pendentes para apagar.', 'info');
       return;
     }
 
@@ -85,7 +87,7 @@ export function AdminProposals() {
       setIsDeletingPending(true);
       await Promise.all(pending.map((p) => cancelProposal(p.id)));
     } catch {
-      alert('Erro ao apagar algumas propostas. Tente novamente.');
+      notify('Erro ao apagar algumas propostas. Tente novamente.', 'error');
     } finally {
       setIsDeletingPending(false);
     }

@@ -1,9 +1,11 @@
 ﻿import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
 import { useState } from 'react';
+import { useNotifications } from '../context/NotificationsContext';
 import { formatPhoneByThreeDigits } from '../utils/phone';
 import './Contact.css';
 
 export function Contact() {
+  const { notify } = useNotifications();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,7 +16,7 @@ export function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Mensagem enviada com sucesso!');
+    notify('Mensagem enviada com sucesso!', 'success');
     setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
   };
 

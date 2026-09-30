@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { useAuth } from "./AuthContext";
+import { useNotifications } from "./NotificationsContext";
 
 const FavoritesContext = createContext();
 const favoritesContextFallback = {
@@ -12,6 +13,7 @@ const favoritesContextFallback = {
 
 export function FavoritesProvider({ children }) {
   const { user } = useAuth();
+  const { notify } = useNotifications();
   const [favoriteIds, setFavoriteIds] = useState([]);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function FavoritesProvider({ children }) {
   const isFavorite = (carId) => favoriteIds.includes(carId);
   async function toggleFavorite(carId) {
     if (!user) {
-      alert("Faça login para favoritar");
+      notify("Entre na sua conta para adicionar carros aos favoritos.", 'info');
       return;
     }
     if (isFavorite(carId)) await removeFavorite(carId);

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationsContext";
 import { useFavorites } from "../context/FavoritesContext";
 import { useProposals } from "../context/ProposalsContext";
 import { formatPhoneByThreeDigits } from "../utils/phone";
@@ -35,6 +36,7 @@ export function ProfileModal({
     deleteAccount,
     isAdmin,
   } = useAuth();
+  const { notify } = useNotifications();
 
   const [profileName, setProfileName] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
@@ -462,7 +464,7 @@ export function ProfileModal({
                 onClose();
               } catch (error) {
                 console.error(error);
-                alert("Senha incorreta ou sessão expirada.");
+                notify("Senha incorreta ou sessão expirada.", 'error');
               }
             }}
           />

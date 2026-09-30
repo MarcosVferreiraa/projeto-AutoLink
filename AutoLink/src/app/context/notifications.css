@@ -1,0 +1,114 @@
+.notifications-region {
+  position: fixed;
+  z-index: 1200;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: 0.75rem;
+  width: min(26rem, calc(100vw - 2rem));
+  pointer-events: none;
+}
+
+.app-notification {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr) 2rem;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 0.625rem;
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 12px 32px rgba(17, 24, 39, 0.2);
+  pointer-events: auto;
+  animation: notification-enter 180ms ease-out;
+}
+
+.app-notification-success {
+  border-left-color: #16a34a;
+}
+
+.app-notification-error {
+  border-left-color: #dc2626;
+}
+
+.app-notification-warning {
+  border-left-color: #d97706;
+}
+
+.app-notification-icon {
+  margin-top: 0.1rem;
+  color: var(--primary);
+}
+
+.app-notification-success .app-notification-icon {
+  color: #15803d;
+}
+
+.app-notification-error .app-notification-icon {
+  color: #b91c1c;
+}
+
+.app-notification-warning .app-notification-icon {
+  color: #b45309;
+}
+
+.app-notification-content {
+  min-width: 0;
+}
+
+.app-notification-content strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.app-notification-content p {
+  margin: 0.25rem 0 0;
+  color: var(--muted-foreground);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.app-notification-close {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: -0.35rem -0.35rem 0 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.app-notification-close:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+@keyframes notification-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-region {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: calc(100vw - 1.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-notification {
+    animation: none;
+  }
+}

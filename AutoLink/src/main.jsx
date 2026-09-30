@@ -4,16 +4,19 @@ import { AuthProvider } from './app/context/AuthContext';
 import { CarsProvider } from "./app/context/CarContext";          
 import { FavoritesProvider } from "./app/context/FavoritesContext"; 
 import { ProposalsProvider } from "./app/context/ProposalsContext";  
+import { NotificationsProvider } from "./app/context/NotificationsContext";
 import "./styles/index.css";
 
 createRoot(document.getElementById("root")).render(
-  <AuthProvider>
-    <CarsProvider>
-      <FavoritesProvider>
-        <ProposalsProvider>
-          <App />
-        </ProposalsProvider>
-      </FavoritesProvider>
-    </CarsProvider>
-  </AuthProvider>
+  <NotificationsProvider>
+    <AuthProvider>
+      <CarsProvider>
+        <FavoritesProvider>
+          <ProposalsProvider>
+            <App />
+          </ProposalsProvider>
+        </FavoritesProvider>
+      </CarsProvider>
+    </AuthProvider>
+  </NotificationsProvider>
 );

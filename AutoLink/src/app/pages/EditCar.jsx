@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCars } from '../context/CarContext';
+import { useNotifications } from '../context/NotificationsContext';
 import './EditCar.css';
 
 const MARCAS_PREDEFINIDAS = [
@@ -13,6 +14,7 @@ export function EditCar() {
   const navigate = useNavigate();
   // Agora 'updateCar' vem corretamente do contexto
   const { getCarById, updateCar } = useCars();
+  const { notify } = useNotifications();
 
   const [formData, setFormData] = useState({
     brand: '', model: '', year: '', price: '', mileage: '',
@@ -57,7 +59,7 @@ export function EditCar() {
       navigate(-1);
     } catch (error) {
       console.error("Erro ao salvar:", error);
-      alert("Erro ao salvar alterações.");
+      notify('Erro ao salvar alterações.', 'error');
     }
   };
 

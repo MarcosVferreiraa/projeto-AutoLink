@@ -6,7 +6,7 @@ import { AddCarModal } from '../components/AddCarModal';
 import { LoginModal } from '../components/LoginModal';
 import { useCars } from '../context/CarContext'
 import { useAuth } from '../context/AuthContext';
-import { Search, Plus, Trash2 } from 'lucide-react';
+import { Search, Plus, Trash2, Info, LogIn, X } from 'lucide-react';
 import "./home.css";
 import { ConfirmModal } from '../components/ConfirmModal';
 
@@ -18,6 +18,7 @@ export function Home() {
   const [isAddCarModalOpen, setIsAddCarModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isLoginNoticeVisible, setIsLoginNoticeVisible] = useState(false);
   const [carToDelete, setCarToDelete] = useState(null);
   const [page, setPage] = useState(1);
 
@@ -70,9 +71,9 @@ export function Home() {
   // Função para abrir o modal com verificação de segurança
   const handleOpenAddModal = () => {
     if (!user) {
-      alert("Você precisa estar logado para anunciar um veículo!");
-      setIsLoginModalOpen(true); //  Abre o modal de login diretamente em vez de redirecionar
+      setIsLoginNoticeVisible(true);
     } else {
+      setIsLoginNoticeVisible(false);
       setIsAddCarModalOpen(true);
     }
   };
@@ -152,6 +153,35 @@ export function Home() {
         title="Excluir veículo"
         message="Esta ação não pode ser desfeita. Deseja continuar?"
       />
+
+      {isLoginNoticeVisible && (
+        <div className="car-login-notice" role="alert" aria-live="assertive">
+          <Info className="car-login-notice-icon" size={22} aria-hidden="true" />
+          <div className="car-login-notice-content">
+            <strong>Entre para anunciar</strong>
+            <p>Faça login ou crie uma conta para publicar seu veículo.</p>
+            <button
+              type="button"
+              className="car-login-notice-action"
+              onClick={() => {
+                setIsLoginNoticeVisible(false);
+                setIsLoginModalOpen(true);
+              }}
+            >
+              <LogIn size={16} aria-hidden="true" />
+              Entrar ou criar conta
+            </button>
+          </div>
+          <button
+            type="button"
+            className="car-login-notice-close"
+            aria-label="Fechar aviso"
+            onClick={() => setIsLoginNoticeVisible(false)}
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {/* Botão Flutuante */}
       <button

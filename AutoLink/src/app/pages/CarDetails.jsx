@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Heart, Calculator, Edit, Trash2, Send, Calendar, Gauge, Fuel, Zap, Palette } from 'lucide-react';
 import { useCars } from '../context/CarContext';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationsContext';
 import { useFavorites } from '../context/FavoritesContext';
 import { useProposals } from '../context/ProposalsContext';
 import { formatCurrency } from '../utils/currency';
@@ -17,6 +18,7 @@ export function CarDetails() {
   const navigate = useNavigate();
   const { cars, loading, removeCar } = useCars();
   const { user, userProfile, isAdmin } = useAuth() || {};
+  const { notify } = useNotifications();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addProposal } = useProposals();
   const [isProposalModalOpen, setIsProposalModalOpen] = useState(false);
@@ -58,12 +60,20 @@ export function CarDetails() {
   if (!car) return <div className="car-details-container">Veículo não encontrado.</div>;
 
   const canEdit = user && (isAdmin || car.userId === user?.uid);
+  const carFeatures = (Array.isArray(car.features)
+    ? car.features
+    : typeof car.features === 'string'
+      ? car.features.split(',')
+      : [])
+    .filter((feature) => typeof feature === 'string')
+    .map((feature) => feature.trim())
+    .filter(Boolean);
 
   const handleSendProposal = async (event) => {
     event.preventDefault();
 
     if (!user) {
-      alert('Faça login para enviar uma proposta.');
+      notify('Entre na sua conta para enviar uma proposta.', 'info');
       return;
     }
 
@@ -94,7 +104,7 @@ export function CarDetails() {
       setIsProposalModalOpen(false);
       setProposalValue('');
       setProposalMessage('');
-      alert('Proposta enviada para análise do administrador.');
+      notify('Proposta enviada para análise do administrador.', 'success');
     } catch (error) {
       console.error('Erro ao enviar proposta:', error);
       setProposalError('Não foi possível enviar a proposta agora. Tente novamente.');
@@ -105,7 +115,7 @@ export function CarDetails() {
 
   const openProposalModal = () => {
     if (!user) {
-      alert('Faça login para enviar uma proposta.');
+      notify('Entre na sua conta para enviar uma proposta.', 'info');
       return;
     }
 
@@ -146,6 +156,17 @@ export function CarDetails() {
             <h3>Descrição</h3>
             <p>{car.description}</p>
           </div>
+
+          {carFeatures.length > 0 && (
+            <section className="car-features-card">
+              <h3>Equipamentos</h3>
+              <ul className="car-features-list">
+                {carFeatures.map((feature, index) => (
+                  <li key={`${feature}-${index}`}>{feature}</li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <div className="owner-info-card">
             <h3>Informações do Anunciante</h3>
