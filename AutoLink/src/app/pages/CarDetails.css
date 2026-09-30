@@ -62,7 +62,8 @@
   font-weight: 500;
 }
 
-.car-description-card {
+.car-description-card,
+.car-features-card {
   margin-top: 1.1rem;
   border: 1.5px solid #d1d5db;
   border-radius: 0.85rem;
@@ -71,7 +72,8 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.car-description-card h3 {
+.car-description-card h3,
+.car-features-card h3 {
   margin: 0 0 0.6rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
@@ -80,6 +82,19 @@
 .car-description-card p {
   margin: 0;
   line-height: 1.55;
+}
+
+.car-features-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.car-features-list li {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .btn-action {
